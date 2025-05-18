@@ -1,5 +1,5 @@
 import userService from '@/services/userService'
-import { addToken } from '@/store/features/useSlice'
+import { addToken, logout } from '@/store/features/useSlice'
 import type { requestMessage, SingInRequest } from '@/types/user'
 import { PATH } from '@/utils/const'
 import { useMutation } from '@tanstack/react-query'
@@ -30,11 +30,16 @@ export function useConnectWallet() {
   const { data: nativeToken } = useBalance({ address })
   const [isLoading, setIsLoading] = useState(false)
 
+  const handleDisconnect = () => {
+    disconnect()
+    dispatch(logout())
+  }
+
   const { signMessageAsync } = useSignMessage({
     mutation: {
       onError: () => {
         toast.error(`❌ signMessage failed!`)
-        disconnect()
+        handleDisconnect()
       }
     }
   })
@@ -51,7 +56,7 @@ export function useConnectWallet() {
     },
     onError: () => {
       toast.error('❌ Login faild!')
-      disconnect()
+      handleDisconnect()
     },
     onSettled: () => {
       setIsLoading(false)
@@ -74,7 +79,7 @@ export function useConnectWallet() {
     },
     onError: () => {
       toast.error("❌ Can't request authentication")
-      disconnect()
+      handleDisconnect()
     },
     onSettled: () => {
       setIsLoading(false)
@@ -88,12 +93,12 @@ export function useConnectWallet() {
   return {
     handleConnect,
     connectors,
-    disconnect,
     isConnected,
     isLoading,
     chainId,
     nativeToken,
     address,
-    requestMutate
+    requestMutate,
+    handleDisconnect
   }
 }

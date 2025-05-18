@@ -24,7 +24,7 @@ const HeaderContainer = styled.header`
 `
 
 const Header = ({ title }: HeaderProps) => {
-  const { isConnected, disconnect, address } = useConnectWallet()
+  const { isConnected, handleDisconnect, address } = useConnectWallet()
 
   useEffect(() => {
     document.title = title
@@ -44,7 +44,7 @@ const Header = ({ title }: HeaderProps) => {
               <Button color='cyan' variant='text'>
                 {shortenAddress(address!)}
               </Button>
-              <Button color='danger' variant='solid' onClick={() => disconnect()}>
+              <Button color='danger' variant='solid' onClick={handleDisconnect}>
                 Disconnect
               </Button>
             </Flex>

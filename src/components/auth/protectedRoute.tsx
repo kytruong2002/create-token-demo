@@ -1,3 +1,4 @@
+import Wrapper from '@/components/wrapper'
 import { userSelector } from '@/store/selectors'
 import { PATH } from '@/utils/const'
 import type { ReactNode } from 'react'
@@ -9,7 +10,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const location = useLocation()
 
   if (token) {
-    return <>{children}</>
+    return <Wrapper>{children}</Wrapper>
   }
 
   return <Navigate to={PATH.LOGIN} state={{ from: location }} replace />
