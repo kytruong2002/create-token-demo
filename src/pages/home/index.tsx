@@ -5,7 +5,8 @@ import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import tokenService from '@/services/tokenService'
 import Default from '@/templates/default'
-import { checkValueNumber, shortenAddress } from '@/utils/helpers'
+import { RULES } from '@/utils/const'
+import { shortenAddress } from '@/utils/helpers'
 import { Button, Card, Col, Flex, Form, Input, Row, Spin, Tag, Upload, type FormProps, type UploadFile } from 'antd'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -191,91 +192,37 @@ const Home = () => {
             >
               <Row gutter={[16, 0]}>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='name'
-                    name='name'
-                    rules={[{ required: true, message: 'Please input a token name!' }]}
-                  >
+                  <Form.Item<FieldTokenType> label='name' name='name' rules={RULES.name}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='symbol'
-                    name='symbol'
-                    rules={[
-                      { required: true, message: 'Please input a token symbol!' },
-                      {
-                        pattern: /^[A-Z]{1,10}$/,
-                        message: 'Symbol must be 1-10 uppercase letters (A-Z)'
-                      }
-                    ]}
-                  >
+                  <Form.Item<FieldTokenType> label='symbol' name='symbol' rules={RULES.symbol}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='maxSupply'
-                    name='maxSupply'
-                    rules={[
-                      { required: true, message: 'Please input a token maxSupply!' },
-                      {
-                        validator: (_, value) => checkValueNumber(value)
-                      }
-                    ]}
-                  >
+                  <Form.Item<FieldTokenType> label='maxSupply' name='maxSupply' rules={RULES.maxSupply}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='initialSupply'
-                    name='initialSupply'
-                    rules={[
-                      { required: true, message: 'Please input a token initialSupply!' },
-                      {
-                        validator: (_, value) => checkValueNumber(value)
-                      }
-                    ]}
-                  >
+                  <Form.Item<FieldTokenType> label='initialSupply' name='initialSupply' rules={RULES.initialSupply}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='amountPerMint'
-                    name='amountPerMint'
-                    rules={[
-                      { required: true, message: 'Please input a token amountPerMint!' },
-                      {
-                        validator: (_, value) => checkValueNumber(value)
-                      }
-                    ]}
-                  >
+                  <Form.Item<FieldTokenType> label='amountPerMint' name='amountPerMint' rules={RULES.amountPerMint}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='mintFee'
-                    name='mintFee'
-                    rules={[
-                      { required: true, message: 'Please input a token mintFee!' },
-                      {
-                        validator: (_, value) => checkValueNumber(value)
-                      }
-                    ]}
-                  >
+                  <Form.Item<FieldTokenType> label='mintFee' name='mintFee' rules={RULES.mintFee}>
                     <Input />
                   </Form.Item>
                 </Col>
                 <Col span={12}>
-                  <Form.Item<FieldTokenType>
-                    label='description'
-                    name='description'
-                    rules={[{ required: true, message: 'Please input a token description!' }]}
-                  >
+                  <Form.Item<FieldTokenType> label='description' name='description' rules={RULES.description}>
                     <Input.TextArea rows={4} />
                   </Form.Item>
                 </Col>
@@ -289,7 +236,7 @@ const Home = () => {
                       setFileList(newFileList)
                       return newFileList
                     }}
-                    rules={[{ required: true, message: 'Please upload a token image!' }]}
+                    rules={RULES.image}
                   >
                     <UploadCustom
                       name='image'
