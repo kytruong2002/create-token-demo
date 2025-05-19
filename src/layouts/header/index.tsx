@@ -1,7 +1,6 @@
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import { PATH } from '@/utils/const'
-import { shortenAddress } from '@/utils/helpers'
-import { Container, CustomParagraph } from '@/utils/styles'
+import { Container } from '@/utils/styles'
 import { Button, Flex } from 'antd'
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
@@ -24,7 +23,7 @@ const HeaderContainer = styled.header`
 `
 
 const Header = ({ title }: HeaderProps) => {
-  const { isConnected, handleDisconnect, address } = useConnectWallet()
+  const { isConnected, handleDisconnect } = useConnectWallet()
 
   useEffect(() => {
     document.title = title
@@ -40,14 +39,9 @@ const Header = ({ title }: HeaderProps) => {
             </Title>
           </Link>
           {isConnected && (
-            <Flex align='center' gap='0.5rem'>
-              <Button color='cyan' variant='text'>
-                <CustomParagraph copyable={{ text: address }}>{shortenAddress(address!)}</CustomParagraph>
-              </Button>
-              <Button color='danger' variant='solid' onClick={handleDisconnect}>
-                Disconnect
-              </Button>
-            </Flex>
+            <Button color='danger' variant='solid' onClick={handleDisconnect}>
+              Disconnect
+            </Button>
           )}
         </Flex>
       </Container>
