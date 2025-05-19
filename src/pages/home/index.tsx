@@ -117,8 +117,9 @@ const Home = () => {
         const res = await tokenService.create(formData)
         toast.success(`🎉 ${res.message}`)
         form.resetFields()
+        setFileList([])
       } else {
-        toast.error('Create token failed')
+        toast.error('Create token failed!')
       }
     } catch (error: any) {
       toast.error(error?.shortMessage || error?.message || 'Something went wrong.')
@@ -247,7 +248,7 @@ const Home = () => {
                       fileList={fileList}
                       onChange={({ fileList }) => setFileList(fileList)}
                     >
-                      {fileList.length < 1 && (
+                      {fileList?.length < 1 && (
                         <div>
                           <div style={{ marginTop: 8 }}>Upload</div>
                         </div>
