@@ -1,9 +1,9 @@
-import Wrapper from '@/components/wrapper'
 import { userSelector } from '@/store/selectors'
 import { PATH } from '@/utils/const'
 import type { ReactNode } from 'react'
 import { useSelector } from 'react-redux'
 import { Navigate, useLocation } from 'react-router-dom'
+import { Wrapper } from '@/components'
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { token } = useSelector(userSelector)

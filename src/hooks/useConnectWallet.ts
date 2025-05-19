@@ -13,7 +13,7 @@ export function useConnectWallet() {
   const { connect, connectors } = useConnect({
     mutation: {
       onError: () => {
-        toast.error(`❌ Connect failed!`)
+        toast.error(`Connect failed!`)
       }
     }
   })
@@ -21,7 +21,7 @@ export function useConnectWallet() {
   const { disconnect } = useDisconnect({
     mutation: {
       onError: () => {
-        toast.error(`❌ Disconnect failed!`)
+        toast.error(`Disconnect failed!`)
       }
     }
   })
@@ -38,7 +38,7 @@ export function useConnectWallet() {
   const { signMessageAsync } = useSignMessage({
     mutation: {
       onError: () => {
-        toast.error(`❌ signMessage failed!`)
+        toast.error(`signMessage failed!`)
         handleDisconnect()
       }
     }
@@ -50,12 +50,12 @@ export function useConnectWallet() {
       return userService.signIn(data)
     },
     onSuccess: (data) => {
-      toast.success('✅ Login successfully!')
+      toast.success('Login successfully!')
       dispatch(addToken(data.data))
       navigate(PATH.HOME)
     },
     onError: () => {
-      toast.error('❌ Login faild!')
+      toast.error('Login faild!')
       handleDisconnect()
     },
     onSettled: () => {
@@ -78,7 +78,7 @@ export function useConnectWallet() {
       })
     },
     onError: () => {
-      toast.error("❌ Can't request authentication")
+      toast.error("Can't request authentication")
       handleDisconnect()
     },
     onSettled: () => {
