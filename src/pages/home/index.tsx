@@ -71,7 +71,8 @@ const Home = () => {
         parseEther(maxSupply as string),
         parseEther(amountPerMint as string),
         parseEther(mintFee as string)
-      ]
+      ],
+      account: address
     }
   }
 
@@ -122,7 +123,8 @@ const Home = () => {
         toast.error('Create token failed!')
       }
     } catch (error: any) {
-      toast.error(error?.shortMessage || error?.message || 'Something went wrong.')
+      console.error('Error creating token:', error)
+      toast.error('Create token failed!')
     } finally {
       setIsLoading(false)
     }
@@ -258,7 +260,7 @@ const Home = () => {
                 </Col>
               </Row>
               <FlexCustom justify='flex-end' align='center' gap={10}>
-                <span>Fee Gas: </span>
+                <span>Estimated gas fee: </span>
                 <Tag bordered={false} color='volcano'>
                   {formatEther(feeGas)} {NATIVE_SYMBOL}
                 </Tag>
