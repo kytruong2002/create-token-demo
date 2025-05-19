@@ -7,6 +7,7 @@ import tokenService from '@/services/tokenService'
 import Default from '@/templates/default'
 import { RULES } from '@/utils/const'
 import { shortenAddress } from '@/utils/helpers'
+import { CustomParagraph } from '@/utils/styles'
 import { Button, Card, Col, Flex, Form, Input, Row, Spin, Tag, Upload, type FormProps, type UploadFile } from 'antd'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -158,7 +159,7 @@ const Home = () => {
             <FlexCustom justify='space-between' align='center' gap={10}>
               <span>Wallet Address:</span>
               <Tag bordered={false} color='cyan'>
-                {shortenAddress(address as `0x${string}`)}
+                <CustomParagraph copyable={{ text: address }}>{shortenAddress(address!)}</CustomParagraph>
               </Tag>
             </FlexCustom>
             <FlexCustom justify='space-between' align='center' gap={10}>

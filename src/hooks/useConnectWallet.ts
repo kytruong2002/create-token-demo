@@ -18,13 +18,7 @@ export function useConnectWallet() {
     }
   })
   const dispatch = useDispatch()
-  const { disconnect } = useDisconnect({
-    mutation: {
-      onError: () => {
-        toast.error(`Disconnect failed!`)
-      }
-    }
-  })
+  const { disconnect } = useDisconnect()
   const navigate = useNavigate()
   const { address, isConnected, chainId } = useAccount()
   const { data: nativeToken } = useBalance({ address })
