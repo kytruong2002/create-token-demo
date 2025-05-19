@@ -154,7 +154,7 @@ const Home = () => {
   return (
     <Default title='Home Page'>
       <Row gutter={[16, 16]} style={{ marginTop: 20 }}>
-        <Col span={8}>
+        <Col xs={24} md={8}>
           <Card title={'Wallet Info'.toLocaleUpperCase()} variant='borderless'>
             <FlexCustom justify='space-between' align='center' gap={10}>
               <span>Wallet Address:</span>
@@ -184,7 +184,7 @@ const Home = () => {
             </FlexCustom>
           </Card>
         </Col>
-        <Col span={16}>
+        <Col xs={24} md={16}>
           <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
             <Form
               name='createToken'
@@ -195,42 +195,42 @@ const Home = () => {
               form={form}
             >
               <Row gutter={[16, 0]}>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='name' name='name' rules={RULES.name}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='symbol' name='symbol' rules={RULES.symbol}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='maxSupply' name='maxSupply' rules={RULES.maxSupply}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='initialSupply' name='initialSupply' rules={RULES.initialSupply}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='amountPerMint' name='amountPerMint' rules={RULES.amountPerMint}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='mintFee' name='mintFee' rules={RULES.mintFee}>
                     <Input />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item<FieldTokenType> label='description' name='description' rules={RULES.description}>
                     <Input.TextArea rows={4} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item
                     label='Image'
                     name='image'
@@ -266,7 +266,7 @@ const Home = () => {
                   {formatEther(feeGas)} {NATIVE_SYMBOL}
                 </Tag>
               </FlexCustom>
-              <Flex justify='end' gap={10}>
+              <Flex justify='end' gap={10} wrap='wrap'>
                 <BtnSwitchChain />
                 <Button htmlType='submit' color='cyan' variant='solid' size='large'>
                   Create
