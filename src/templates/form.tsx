@@ -1,17 +1,14 @@
-import Header from '@/layouts/header'
+import { Header } from '@/layouts'
 import { Container } from '@/utils/styles'
-import React from 'react'
+import { Outlet } from 'react-router-dom'
 
-interface FormProps {
-  children: React.ReactNode
-  title: string
-}
-
-const Form = ({ children, title }: FormProps) => {
+const Form = () => {
   return (
     <>
-      <Header title={title} />
-      <Container>{children}</Container>
+      <Header />
+      <Container>
+        <Outlet />
+      </Container>
     </>
   )
 }

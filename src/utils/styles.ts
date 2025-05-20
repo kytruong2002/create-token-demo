@@ -1,4 +1,4 @@
-import { Typography } from 'antd'
+import { Flex, Typography } from 'antd'
 import styled from 'styled-components'
 
 export const Container = styled.div`
@@ -15,4 +15,8 @@ export const CustomParagraph = styled(Typography.Paragraph)`
   .anticon.anticon-copy {
     color: rgb(19, 194, 194);
   }
+`
+
+export const FlexCustom = styled(Flex)`
+  margin-bottom: 20px;
 `

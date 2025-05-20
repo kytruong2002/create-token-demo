@@ -2,13 +2,9 @@ import { useConnectWallet } from '@/hooks/useConnectWallet'
 import { PATH } from '@/utils/const'
 import { Container } from '@/utils/styles'
 import { Button, Flex } from 'antd'
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
-
-interface HeaderProps {
-  title: string
-}
 
 const Title = styled(Button)`
   font-size: 2rem;
@@ -22,12 +18,13 @@ const HeaderContainer = styled.header`
   align-items: center;
 `
 
-const Header = ({ title }: HeaderProps) => {
+const Header = () => {
   const { isConnected, handleDisconnect } = useConnectWallet()
-
+  const location = useLocation()
+  const [title, setTitle] = useState(document.title)
   useEffect(() => {
-    document.title = title
-  }, [title])
+    setTitle(document.title)
+  }, [location.pathname])
 
   return (
     <HeaderContainer>

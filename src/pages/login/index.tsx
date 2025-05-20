@@ -1,5 +1,4 @@
 import { useConnectWallet } from '@/hooks/useConnectWallet'
-import Form from '@/templates/form'
 import type { StyleColor } from '@/types/style'
 import { COLORS } from '@/utils/const'
 import { Button, Card, Flex, Spin } from 'antd'
@@ -10,7 +9,9 @@ const CardCustom = styled(Card)`
   width: 50vw;
   margin-top: 20px;
 `
+
 const Login = () => {
+  document.title = 'Login'
   const { connectors, handleConnect, address, isConnected, requestMutate, isLoading } = useConnectWallet()
 
   useEffect(() => {
@@ -19,7 +20,7 @@ const Login = () => {
     }
   }, [address, isConnected, requestMutate])
   return (
-    <Form title='Login'>
+    <>
       <Flex align='center' justify='center'>
         <CardCustom title={'Connect Wallet'.toLocaleUpperCase()} variant='borderless'>
           <Flex align='center' justify='center' vertical gap={15}>
@@ -35,7 +36,7 @@ const Login = () => {
         </CardCustom>
       </Flex>
       <Spin fullscreen size='large' spinning={isLoading} />
-    </Form>
+    </>
   )
 }
 

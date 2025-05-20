@@ -20,11 +20,12 @@ export function useConnectWallet() {
   const dispatch = useDispatch()
   const { disconnect } = useDisconnect()
   const navigate = useNavigate()
-  const { address, isConnected, chainId } = useAccount()
+  const { address, isConnected, chainId, chain } = useAccount()
   const { data: nativeToken } = useBalance({ address })
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDisconnect = () => {
+    if (!isConnected) return
     disconnect()
     dispatch(logout())
   }
@@ -32,8 +33,8 @@ export function useConnectWallet() {
   const { signMessageAsync } = useSignMessage({
     mutation: {
       onError: () => {
-        toast.error(`signMessage failed!`)
-        handleDisconnect()
+        toast.error(`Sign message failed! Please try again.`)
+        dispatch(logout())
       }
     }
   })
@@ -93,6 +94,7 @@ export function useConnectWallet() {
     nativeToken,
     address,
     requestMutate,
-    handleDisconnect
+    handleDisconnect,
+    chain
   }
 }

@@ -1,13 +1,10 @@
-import { BtnSwitchChain } from '@/components'
 import { CHAIN_ID, CHAIN_SUPPORTED, NATIVE_SYMBOL } from '@/config/chain'
 import { wagmiConfig } from '@/config/wagmi'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import tokenService from '@/services/tokenService'
-import Default from '@/templates/default'
 import { RULES } from '@/utils/const'
-import { shortenAddress } from '@/utils/helpers'
-import { CustomParagraph } from '@/utils/styles'
+import { FlexCustom } from '@/utils/styles'
 import { Button, Card, Col, Flex, Form, Input, Row, Spin, Tag, Upload, type FormProps, type UploadFile } from 'antd'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -27,10 +24,6 @@ type FieldTokenType = {
   image?: UploadFile[]
 }
 
-const FlexCustom = styled(Flex)`
-  margin-bottom: 20px;
-`
-
 const UploadCustom = styled(Upload)`
   .ant-upload.ant-upload-select,
   .ant-upload-list-item-container {
@@ -39,6 +32,7 @@ const UploadCustom = styled(Upload)`
 `
 
 const Home = () => {
+  document.title = 'Create Token'
   const publicClient = usePublicClient()
   const { writeContractAsync } = useWriteContract()
   const initValueFormToken: FieldTokenType = {
@@ -156,132 +150,97 @@ const Home = () => {
   }
 
   return (
-    <Default title='Home Page'>
-      <Row gutter={[16, 16]} style={{ marginTop: 20 }}>
-        <Col xs={24} md={8}>
-          <Card title={'Wallet Info'.toLocaleUpperCase()} variant='borderless'>
-            <FlexCustom justify='space-between' align='center' gap={10}>
-              <span>Wallet Address:</span>
-              <Tag bordered={false} color='cyan'>
-                <CustomParagraph copyable={{ text: address }}>{shortenAddress(address!)}</CustomParagraph>
-              </Tag>
-            </FlexCustom>
-            <FlexCustom justify='space-between' align='center' gap={10}>
-              <span>Network:</span>
-              <Tag bordered={false} color='cyan'>
-                {wagmiConfig?.chains[0]?.name}
-              </Tag>
-            </FlexCustom>
-            <FlexCustom justify='space-between' align='center' gap={10}>
-              <span>Chain ID:</span>
-              <Tag bordered={false} color='cyan'>
-                {wagmiConfig?.chains[0]?.id}
-              </Tag>
-            </FlexCustom>
-            <FlexCustom justify='space-between' align='center' gap={10}>
-              <span>Wallet Balance:</span>
-              <Tag bordered={false} color='cyan'>
-                <span>
-                  {formatEther(balanceData?.value ?? BigInt(0))} {balanceData?.symbol}
-                </span>
-              </Tag>
-            </FlexCustom>
-          </Card>
-        </Col>
-        <Col xs={24} md={16}>
-          <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
-            <Form
-              name='createToken'
-              initialValues={initValueFormToken}
-              onFinish={onFinish}
-              onFieldsChange={handleFieldsChange}
-              layout='vertical'
-              form={form}
-            >
-              <Row gutter={[16, 0]}>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='name' name='name' rules={RULES.name}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='symbol' name='symbol' rules={RULES.symbol}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='maxSupply' name='maxSupply' rules={RULES.maxSupply}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='initialSupply' name='initialSupply' rules={RULES.initialSupply}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='amountPerMint' name='amountPerMint' rules={RULES.amountPerMint}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='mintFee' name='mintFee' rules={RULES.mintFee}>
-                    <Input />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item<FieldTokenType> label='description' name='description' rules={RULES.description}>
-                    <Input.TextArea rows={4} />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item
-                    label='Image'
-                    name='image'
-                    valuePropName='fileList'
-                    getValueFromEvent={(e) => {
-                      const newFileList = Array.isArray(e) ? e : e?.fileList || []
-                      setFileList(newFileList)
-                      return newFileList
-                    }}
-                    rules={RULES.image}
-                  >
-                    <UploadCustom
-                      name='image'
-                      listType='picture-card'
-                      accept='image/*'
-                      maxCount={1}
-                      beforeUpload={() => false}
-                      fileList={fileList}
-                      onChange={({ fileList }) => setFileList(fileList)}
-                    >
-                      {fileList?.length < 1 && (
-                        <div>
-                          <div style={{ marginTop: 8 }}>Upload</div>
-                        </div>
-                      )}
-                    </UploadCustom>
-                  </Form.Item>
-                </Col>
-              </Row>
-              <FlexCustom justify='flex-end' align='center' gap={10}>
-                <span>Estimated gas fee: </span>
-                <Tag bordered={false} color='volcano'>
-                  {formatEther(feeGas)} {NATIVE_SYMBOL}
-                </Tag>
-              </FlexCustom>
-              <Flex justify='end' gap={10} wrap='wrap'>
-                <BtnSwitchChain />
-                <Button htmlType='submit' color='cyan' variant='solid' size='large'>
-                  Create
-                </Button>
-              </Flex>
-            </Form>
-          </Card>
-        </Col>
-      </Row>
+    <>
+      <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
+        <Form
+          name='createToken'
+          initialValues={initValueFormToken}
+          onFinish={onFinish}
+          onFieldsChange={handleFieldsChange}
+          layout='vertical'
+          form={form}
+        >
+          <Row gutter={[16, 0]}>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='name' name='name' rules={RULES.name}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='symbol' name='symbol' rules={RULES.symbol}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='maxSupply' name='maxSupply' rules={RULES.maxSupply}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='initialSupply' name='initialSupply' rules={RULES.initialSupply}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='amountPerMint' name='amountPerMint' rules={RULES.amountPerMint}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='mintFee' name='mintFee' rules={RULES.mintFee}>
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item<FieldTokenType> label='description' name='description' rules={RULES.description}>
+                <Input.TextArea rows={4} />
+              </Form.Item>
+            </Col>
+            <Col xs={24} md={12}>
+              <Form.Item
+                label='Image'
+                name='image'
+                valuePropName='fileList'
+                getValueFromEvent={(e) => {
+                  const newFileList = Array.isArray(e) ? e : e?.fileList || []
+                  setFileList(newFileList)
+                  return newFileList
+                }}
+                rules={RULES.image}
+              >
+                <UploadCustom
+                  name='image'
+                  listType='picture-card'
+                  accept='image/*'
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  fileList={fileList}
+                  onChange={({ fileList }) => setFileList(fileList)}
+                >
+                  {fileList?.length < 1 && (
+                    <div>
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  )}
+                </UploadCustom>
+              </Form.Item>
+            </Col>
+          </Row>
+          <FlexCustom justify='flex-end' align='center' gap={10}>
+            <span>Estimated gas fee: </span>
+            <Tag bordered={false} color='volcano'>
+              {formatEther(feeGas)} {NATIVE_SYMBOL}
+            </Tag>
+          </FlexCustom>
+          <Flex justify='end'>
+            <Button htmlType='submit' color='cyan' variant='solid' size='large'>
+              Create
+            </Button>
+          </Flex>
+        </Form>
+      </Card>
       <Spin fullscreen size='large' spinning={isLoading} />
-    </Default>
+    </>
   )
 }
 
