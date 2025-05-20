@@ -1,5 +1,5 @@
 import { BtnSwitchChain } from '@/components'
-import { NATIVE_SYMBOL } from '@/config/chain'
+import { CHAIN_ID, CHAIN_SUPPORTED, NATIVE_SYMBOL } from '@/config/chain'
 import { wagmiConfig } from '@/config/wagmi'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -51,7 +51,7 @@ const Home = () => {
     description: ''
   }
   const [feeGas, setFeeGas] = useState<bigint>(BigInt(0))
-  const { address } = useConnectWallet()
+  const { address, chainId } = useConnectWallet()
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
@@ -90,6 +90,10 @@ const Home = () => {
   const onFinish: FormProps<FieldTokenType>['onFinish'] = async (values) => {
     if (!address) {
       toast.error('Please connect your wallet first.')
+      return
+    }
+    if (chainId !== CHAIN_ID) {
+      toast.error(`Please switch to ${CHAIN_SUPPORTED.name} network.`)
       return
     }
     const balance = balanceData?.value ?? BigInt(0)
