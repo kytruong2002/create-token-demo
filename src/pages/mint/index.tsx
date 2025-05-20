@@ -24,7 +24,7 @@ const Mint = () => {
   const [form] = Form.useForm()
   const [isLoading, setIsLoading] = useState(false)
   const initValueFormMint: FieldMintType = {
-    amount: ''
+    amount: '0.0001'
   }
   const { data: totalSupply } = useReadContract({
     ...paramsContract,
@@ -45,6 +45,10 @@ const Mint = () => {
   const { data: decimals } = useReadContract({
     ...paramsContract,
     functionName: 'decimals'
+  })
+  const { data: amountPerMint } = useReadContract({
+    ...paramsContract,
+    functionName: 'amountPerMint'
   })
   const { address } = useConnectWallet()
   const { writeContractAsync } = useWriteContract()
@@ -162,6 +166,12 @@ const Mint = () => {
           <span>Max Supply:</span>
           <Tag bordered={false} color='cyan'>
             {formatUnits((maxSupply as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+          </Tag>
+        </FlexCustom>
+        <FlexCustom justify='space-between' align='center' gap={10}>
+          <span>Amount Per Mint:</span>
+          <Tag bordered={false} color='cyan'>
+            {formatUnits((amountPerMint as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
       </Card>
