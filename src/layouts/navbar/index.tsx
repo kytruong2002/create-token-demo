@@ -30,9 +30,11 @@ const Navbar = () => {
       <Card title={'Wallet Info'.toLocaleUpperCase()} variant='borderless'>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Wallet Address:</span>
-          <Tag bordered={false} color='cyan'>
-            <CustomParagraph copyable={{ text: address }}>{shortenAddress(address!)}</CustomParagraph>
-          </Tag>
+          {address && (
+            <Tag bordered={false} color='cyan'>
+              <CustomParagraph copyable={{ text: address }}>{shortenAddress(address!)}</CustomParagraph>
+            </Tag>
+          )}
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Network:</span>

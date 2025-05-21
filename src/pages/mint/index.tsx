@@ -1,19 +1,14 @@
 import { wagmiConfig } from '@/config/wagmi'
 import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import { CONTRACRT_ADDRESS } from '@/utils/const'
-import { checkValueNumber, shortenAddress } from '@/utils/helpers'
+import { shortenAddress } from '@/utils/helpers'
 import { CustomParagraph, FlexCustom } from '@/utils/styles'
-import { Button, Card, Flex, Form, Input, Spin, Tag, type FormProps } from 'antd'
+import { Button, Card, Form, Spin, Tag } from 'antd'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { formatUnits, parseEther } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
-import { useBalance, useReadContract, useWriteContract } from 'wagmi'
-import { useConnectWallet } from '@/hooks/useConnectWallet'
-
-type FieldMintType = {
-  amount?: string
-}
+import { useReadContract, useWriteContract } from 'wagmi'
 
 const Mint = () => {
   document.title = 'Mint'
@@ -23,9 +18,7 @@ const Mint = () => {
   }
   const [form] = Form.useForm()
   const [isLoading, setIsLoading] = useState(false)
-  const initValueFormMint: FieldMintType = {
-    amount: '0.0001'
-  }
+
   const { data: totalSupply } = useReadContract({
     ...paramsContract,
     functionName: 'totalSupply'
@@ -50,15 +43,15 @@ const Mint = () => {
     ...paramsContract,
     functionName: 'amountPerMint'
   })
-  const { address } = useConnectWallet()
-  const { writeContractAsync } = useWriteContract()
-  const { data: balanceData } = useBalance({ address })
 
-  const onFinish: FormProps<FieldMintType>['onFinish'] = async (values) => {
+  const { writeContractAsync } = useWriteContract()
+
+  const handleMint = async () => {
     if (typeof totalSupply === 'bigint' && typeof maxSupply === 'bigint') {
       const total = BigInt(totalSupply)
-      const amount = parseEther(values.amount ?? '0')
+      const amount = parseEther('0.0001')
       const max = BigInt(maxSupply)
+
       if (total + amount > max) {
         toast.error('Total supply exceeded max supply')
         return
@@ -94,40 +87,9 @@ const Mint = () => {
   return (
     <>
       <Card title={'Mint'.toLocaleUpperCase()} variant='borderless' style={{ marginBottom: 20 }}>
-        <Form
-          form={form}
-          name='mint'
-          onFinish={onFinish}
-          layout='vertical'
-          initialValues={initValueFormMint}
-          style={{ width: '100%' }}
-        >
-          <Form.Item
-            label='Amount'
-            name='amount'
-            rules={[
-              { required: true, message: 'Please input your amount!' },
-              {
-                validator: (_, value) => checkValueNumber(value)
-              },
-              {
-                validator: (_, value) => {
-                  if (value && balanceData && value > formatUnits(balanceData.value, balanceData.decimals)) {
-                    return Promise.reject(new Error('Amount must be less than your balance'))
-                  }
-                  return Promise.resolve()
-                }
-              }
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Flex justify='end'>
-            <Button htmlType='submit' color='cyan' variant='solid' size='large' style={{ width: '100%' }}>
-              Mint
-            </Button>
-          </Flex>
-        </Form>
+        <Button color='cyan' variant='solid' size='large' style={{ width: '100%' }} onClick={handleMint}>
+          Mint
+        </Button>
       </Card>
       <Card title={'Token Info'.toLocaleUpperCase()} variant='borderless'>
         <FlexCustom justify='space-between' align='center' gap={10}>
