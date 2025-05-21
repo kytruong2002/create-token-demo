@@ -129,6 +129,7 @@ const Home = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleFieldsChange = (_: unknown, allFields: any[]) => {
     const values: Record<string, unknown> = {}
     allFields.forEach((field) => {
