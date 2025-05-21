@@ -3,13 +3,13 @@ import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import { CONTRACRT_ADDRESS } from '@/utils/const'
 import { shortenAddress } from '@/utils/helpers'
 import { CustomParagraph, FlexCustom } from '@/utils/styles'
-import { Button, Card, Form, Spin, Tag } from 'antd'
-import { useState } from 'react'
+import { Button, Card, Form, Tag } from 'antd'
 import { toast } from 'react-toastify'
 import { formatUnits } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
 import { useReadContract, useWriteContract } from 'wagmi'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
+import { useGlobalDataContext } from '@/contexts/globalData'
 
 const Mint = () => {
   document.title = 'Mint'
@@ -18,9 +18,9 @@ const Mint = () => {
     abi: Standard_ERC20_ABI
   }
   const [form] = Form.useForm()
-  const [isLoading, setIsLoading] = useState(false)
+  const { setIsLoading } = useGlobalDataContext()
   const { checkNetwork } = useConnectWallet()
-  const { data: totalSupply } = useReadContract({
+  const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     ...paramsContract,
     functionName: 'totalSupply'
   })
@@ -82,6 +82,7 @@ const Mint = () => {
 
         if (receipt.status === 'success') {
           toast.success('Mint transaction sent successfully!')
+          await refetchTotalSupply()
           form.resetFields()
         } else {
           toast.error('Mint transaction failed!')
@@ -154,7 +155,6 @@ const Mint = () => {
           </Tag>
         </FlexCustom>
       </Card>
-      <Spin fullscreen size='large' spinning={isLoading} />
     </>
   )
 }

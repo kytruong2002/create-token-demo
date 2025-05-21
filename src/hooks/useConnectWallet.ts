@@ -1,10 +1,10 @@
 import { CHAIN_ID, CHAIN_SUPPORTED } from '@/config/chain'
+import { useGlobalDataContext } from '@/contexts/globalData'
 import userService from '@/services/userService'
 import { addToken, logout } from '@/store/features/useSlice'
 import type { requestMessage, SingInRequest } from '@/types/user'
 import { PATH } from '@/utils/const'
 import { useMutation } from '@tanstack/react-query'
-import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
@@ -21,9 +21,9 @@ export function useConnectWallet() {
   const dispatch = useDispatch()
   const { disconnect } = useDisconnect()
   const navigate = useNavigate()
-  const { address, isConnected, chainId, chain } = useAccount()
+  const { address, isConnected, chainId, chain, isDisconnected } = useAccount()
   const { data: nativeToken } = useBalance({ address })
-  const [isLoading, setIsLoading] = useState(false)
+  const { setIsLoading } = useGlobalDataContext()
 
   const handleDisconnect = () => {
     if (!isConnected) return
@@ -98,13 +98,13 @@ export function useConnectWallet() {
     handleConnect,
     connectors,
     isConnected,
-    isLoading,
     chainId,
     nativeToken,
     address,
     requestMutate,
     handleDisconnect,
     chain,
-    checkNetwork
+    checkNetwork,
+    isDisconnected
   }
 }

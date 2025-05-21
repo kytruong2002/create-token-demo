@@ -1,8 +1,8 @@
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import type { StyleColor } from '@/types/style'
 import { COLORS } from '@/utils/const'
-import { Button, Card, Flex, Spin } from 'antd'
-import { useEffect } from 'react'
+import { Button, Card, Flex } from 'antd'
+import { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 
 const CardCustom = styled(Card)`
@@ -12,13 +12,19 @@ const CardCustom = styled(Card)`
 
 const Login = () => {
   document.title = 'Login'
-  const { connectors, handleConnect, address, isConnected, requestMutate, isLoading } = useConnectWallet()
+  const { connectors, handleConnect, address, isConnected, requestMutate, isDisconnected } = useConnectWallet()
+  const hasRequestedRef = useRef(false)
 
   useEffect(() => {
-    if (address && isConnected) {
+    if (address && isConnected && !hasRequestedRef.current && !isDisconnected) {
+      hasRequestedRef.current = true
       requestMutate({ walletAddress: address })
     }
-  }, [address, isConnected, requestMutate])
+
+    if (isDisconnected) {
+      hasRequestedRef.current = false
+    }
+  }, [address, isConnected, requestMutate, isDisconnected])
   return (
     <>
       <Flex align='center' justify='center'>
@@ -35,7 +41,6 @@ const Login = () => {
           </Flex>
         </CardCustom>
       </Flex>
-      <Spin fullscreen size='large' spinning={isLoading} />
     </>
   )
 }

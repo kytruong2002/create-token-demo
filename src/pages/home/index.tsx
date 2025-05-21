@@ -1,11 +1,12 @@
 import { NATIVE_SYMBOL } from '@/config/chain'
 import { wagmiConfig } from '@/config/wagmi'
+import { useGlobalDataContext } from '@/contexts/globalData'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import tokenService from '@/services/tokenService'
 import { RULES } from '@/utils/const'
 import { FlexCustom } from '@/utils/styles'
-import { Button, Card, Col, Flex, Form, Input, Row, Spin, Tag, Upload, type FormProps, type UploadFile } from 'antd'
+import { Button, Card, Col, Flex, Form, Input, Row, Tag, Upload, type FormProps, type UploadFile } from 'antd'
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
@@ -49,7 +50,7 @@ const Home = () => {
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
-  const [isLoading, setIsLoading] = useState(false)
+  const { setIsLoading } = useGlobalDataContext()
   const lastValuesRef = useRef<Partial<FieldTokenType>>({})
 
   const getParamsABI = (values: FieldTokenType) => {
@@ -245,7 +246,6 @@ const Home = () => {
           </Flex>
         </Form>
       </Card>
-      <Spin fullscreen size='large' spinning={isLoading} />
     </>
   )
 }

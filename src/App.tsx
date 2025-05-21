@@ -5,8 +5,11 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './config/queryClient'
 import { WagmiProvider } from 'wagmi'
 import { wagmiConfig } from './config/wagmi'
+import { useGlobalDataContext } from './contexts/globalData'
+import { Spin } from 'antd'
 
 function App() {
+  const { isLoading } = useGlobalDataContext()
   return (
     <>
       <QueryClientProvider client={queryClient}>
@@ -28,6 +31,7 @@ function App() {
           </BrowserRouter>
         </WagmiProvider>
       </QueryClientProvider>
+      <Spin fullscreen size='large' spinning={isLoading} />
     </>
   )
 }
