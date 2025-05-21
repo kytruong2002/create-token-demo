@@ -404,6 +404,19 @@ const Standard_ERC20_ABI = [
     ],
     stateMutability: 'view',
     type: 'function'
+  },
+  {
+    inputs: [],
+    name: 'mintFee',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256'
+      }
+    ],
+    stateMutability: 'view',
+    type: 'function'
   }
 ]
 export default Standard_ERC20_ABI

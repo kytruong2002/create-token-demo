@@ -6,7 +6,7 @@ import { CustomParagraph, FlexCustom } from '@/utils/styles'
 import { Button, Card, Form, Spin, Tag } from 'antd'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
-import { formatUnits, parseEther } from 'viem'
+import { formatEther, formatUnits, parseEther } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
 import { useReadContract, useWriteContract } from 'wagmi'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -45,6 +45,10 @@ const Mint = () => {
     ...paramsContract,
     functionName: 'amountPerMint'
   })
+  const { data: mintFee } = useReadContract({
+    ...paramsContract,
+    functionName: 'mintFee'
+  })
 
   const { writeContractAsync } = useWriteContract()
 
@@ -53,9 +57,14 @@ const Mint = () => {
       toast.error(`Please switch to ${CHAIN_SUPPORTED.name} network.`)
       return
     }
-    if (typeof totalSupply === 'bigint' && typeof maxSupply === 'bigint') {
+    if (
+      typeof totalSupply === 'bigint' &&
+      typeof maxSupply === 'bigint' &&
+      typeof mintFee === 'bigint' &&
+      typeof amountPerMint === 'bigint'
+    ) {
       const total = BigInt(totalSupply)
-      const amount = parseEther('0.0001')
+      const amount = BigInt(amountPerMint)
       const max = BigInt(maxSupply)
 
       if (total + amount > max) {
@@ -68,7 +77,7 @@ const Mint = () => {
         const hash = await writeContractAsync({
           ...paramsContract,
           functionName: 'mint',
-          value: amount
+          value: BigInt(mintFee)
         })
 
         const receipt = await waitForTransactionReceipt(wagmiConfig, {
@@ -140,6 +149,12 @@ const Mint = () => {
           <span>Amount Per Mint:</span>
           <Tag bordered={false} color='cyan'>
             {formatUnits((amountPerMint as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+          </Tag>
+        </FlexCustom>
+        <FlexCustom justify='space-between' align='center' gap={10}>
+          <span>Mint Fee:</span>
+          <Tag bordered={false} color='cyan'>
+            {formatUnits((mintFee as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
       </Card>
