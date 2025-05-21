@@ -50,7 +50,7 @@ const Home = () => {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
   const [isLoading, setIsLoading] = useState(false)
-  const lastValuesRef = useRef<any>({})
+  const lastValuesRef = useRef<Partial<FieldTokenType>>({})
 
   const getParamsABI = (values: FieldTokenType) => {
     const { name, symbol, maxSupply, initialSupply, amountPerMint, mintFee } = values
@@ -76,7 +76,7 @@ const Home = () => {
       const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
       const gasEstimated = (await publicClient?.estimateContractGas(getParamsABI(values))) ?? BigInt(0)
       setFeeGas(gasEstimated * gasPrice)
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error estimating gas:', error)
     }
   }
@@ -121,7 +121,7 @@ const Home = () => {
       } else {
         toast.error('Create token failed!')
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating token:', error)
       toast.error('Create token failed!')
     } finally {
@@ -129,13 +129,20 @@ const Home = () => {
     }
   }
 
-  const handleFieldsChange = (_: any, allFields: any[]) => {
-    const values: any = {}
+  const handleFieldsChange = (_: unknown, allFields: any[]) => {
+    const values: Record<string, unknown> = {}
     allFields.forEach((field) => {
       values[field.name[0]] = field.value
     })
 
-    const requiredFields = ['name', 'symbol', 'maxSupply', 'initialSupply', 'amountPerMint', 'mintFee']
+    const requiredFields: (keyof FieldTokenType)[] = [
+      'name',
+      'symbol',
+      'maxSupply',
+      'initialSupply',
+      'amountPerMint',
+      'mintFee'
+    ]
     const allFilled = requiredFields.every((key) => !!values[key])
 
     if (allFilled) {

@@ -9,6 +9,8 @@ import { toast } from 'react-toastify'
 import { formatUnits, parseEther } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
 import { useReadContract, useWriteContract } from 'wagmi'
+import { useConnectWallet } from '@/hooks/useConnectWallet'
+import { CHAIN_ID, CHAIN_SUPPORTED } from '@/config/chain'
 
 const Mint = () => {
   document.title = 'Mint'
@@ -18,7 +20,7 @@ const Mint = () => {
   }
   const [form] = Form.useForm()
   const [isLoading, setIsLoading] = useState(false)
-
+  const { chainId } = useConnectWallet()
   const { data: totalSupply } = useReadContract({
     ...paramsContract,
     functionName: 'totalSupply'
@@ -47,6 +49,10 @@ const Mint = () => {
   const { writeContractAsync } = useWriteContract()
 
   const handleMint = async () => {
+    if (chainId !== CHAIN_ID) {
+      toast.error(`Please switch to ${CHAIN_SUPPORTED.name} network.`)
+      return
+    }
     if (typeof totalSupply === 'bigint' && typeof maxSupply === 'bigint') {
       const total = BigInt(totalSupply)
       const amount = parseEther('0.0001')

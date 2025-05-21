@@ -33,25 +33,25 @@ export const RULES = {
   maxSupply: [
     { required: true, message: 'Please input a token maxSupply!' },
     {
-      validator: (_, value) => checkValueNumber(value)
+      validator: (_: unknown, value: string) => checkValueNumber(value)
     }
   ],
   initialSupply: [
     { required: true, message: 'Please input a token initialSupply!' },
     {
-      validator: (_, value) => checkValueNumber(value)
+      validator: (_: unknown, value: string) => checkValueNumber(value)
     }
   ],
   amountPerMint: [
     { required: true, message: 'Please input a token amountPerMint!' },
     {
-      validator: (_, value) => checkValueNumber(value)
+      validator: (_: unknown, value: string) => checkValueNumber(value)
     }
   ],
   mintFee: [
     { required: true, message: 'Please input a token mintFee!' },
     {
-      validator: (_, value) => checkValueNumber(value)
+      validator: (_: unknown, value: string) => checkValueNumber(value)
     }
   ],
   description: [{ required: true, message: 'Please input a token description!' }],
