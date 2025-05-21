@@ -34,6 +34,7 @@ export function useConnectWallet() {
   const { signMessageAsync } = useSignMessage({
     mutation: {
       onError: () => {
+        if (isDisconnected) return
         toast.error(`Sign message failed! Please try again.`)
         dispatch(logout())
       }
@@ -74,6 +75,7 @@ export function useConnectWallet() {
       })
     },
     onError: () => {
+      if (isDisconnected) return
       toast.error("Can't request authentication")
       handleDisconnect()
     },
@@ -104,7 +106,6 @@ export function useConnectWallet() {
     requestMutate,
     handleDisconnect,
     chain,
-    checkNetwork,
-    isDisconnected
+    checkNetwork
   }
 }

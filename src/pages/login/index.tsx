@@ -12,19 +12,20 @@ const CardCustom = styled(Card)`
 
 const Login = () => {
   document.title = 'Login'
-  const { connectors, handleConnect, address, isConnected, requestMutate, isDisconnected } = useConnectWallet()
+  const { connectors, handleConnect, address, isConnected, requestMutate } = useConnectWallet()
   const hasRequestedRef = useRef(false)
 
   useEffect(() => {
-    if (address && isConnected && !hasRequestedRef.current && !isDisconnected) {
+    if (address && isConnected && !hasRequestedRef.current) {
       hasRequestedRef.current = true
       requestMutate({ walletAddress: address })
     }
 
-    if (isDisconnected) {
+    if (!isConnected) {
       hasRequestedRef.current = false
     }
-  }, [address, isConnected, requestMutate, isDisconnected])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, isConnected])
   return (
     <>
       <Flex align='center' justify='center'>
