@@ -1,4 +1,4 @@
-import { CHAIN_ID, CHAIN_SUPPORTED, NATIVE_SYMBOL } from '@/config/chain'
+import { NATIVE_SYMBOL } from '@/config/chain'
 import { wagmiConfig } from '@/config/wagmi'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -45,7 +45,7 @@ const Home = () => {
     description: ''
   }
   const [feeGas, setFeeGas] = useState<bigint>(BigInt(0))
-  const { address, chainId } = useConnectWallet()
+  const { address, checkNetwork } = useConnectWallet()
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
@@ -86,10 +86,7 @@ const Home = () => {
       toast.error('Please connect your wallet first.')
       return
     }
-    if (chainId !== CHAIN_ID) {
-      toast.error(`Please switch to ${CHAIN_SUPPORTED.name} network.`)
-      return
-    }
+
     const balance = balanceData?.value ?? BigInt(0)
     if (balance < feeGas) {
       const balanceBNB = formatEther(balance)
@@ -98,6 +95,7 @@ const Home = () => {
       return
     }
 
+    if (!checkNetwork()) return
     try {
       setIsLoading(true)
       const hash = await writeContractAsync(getParamsABI(values))

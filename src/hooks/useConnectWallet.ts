@@ -1,3 +1,4 @@
+import { CHAIN_ID, CHAIN_SUPPORTED } from '@/config/chain'
 import userService from '@/services/userService'
 import { addToken, logout } from '@/store/features/useSlice'
 import type { requestMessage, SingInRequest } from '@/types/user'
@@ -85,6 +86,14 @@ export function useConnectWallet() {
     connect(params)
   }
 
+  const checkNetwork = () => {
+    if (chainId !== CHAIN_ID) {
+      toast.error(`Please switch to ${CHAIN_SUPPORTED.name} network.`)
+      return false
+    }
+    return true
+  }
+
   return {
     handleConnect,
     connectors,
@@ -95,6 +104,7 @@ export function useConnectWallet() {
     address,
     requestMutate,
     handleDisconnect,
-    chain
+    chain,
+    checkNetwork
   }
 }
