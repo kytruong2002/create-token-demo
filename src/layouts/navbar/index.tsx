@@ -52,7 +52,7 @@ const Navbar = () => {
           <span>Wallet Balance:</span>
           <Tag bordered={false} color='cyan'>
             <span>
-              {formatEther(balanceData?.value ?? BigInt(0))} {balanceData?.symbol}
+              {Number(formatEther(balanceData?.value ?? BigInt(0))).toFixed(8)} {balanceData?.symbol}
             </span>
           </Tag>
         </FlexCustom>
