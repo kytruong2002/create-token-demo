@@ -6,7 +6,7 @@ import { CustomParagraph, FlexCustom } from '@/utils/styles'
 import { Button, Card, Flex, Tag } from 'antd'
 import { useLocation } from 'react-router-dom'
 import styled from 'styled-components'
-import { formatEther } from 'viem'
+import { formatUnits } from 'viem'
 import { useBalance } from 'wagmi'
 
 const CustomBtn = styled(Button)`
@@ -51,7 +51,10 @@ const Navbar = () => {
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Wallet Balance:</span>
           <Tag bordered={false} color='cyan'>
-            <FormatToken token={formatEther(balanceData?.value ?? BigInt(0))} symbol={balanceData?.symbol} />
+            <FormatToken
+              token={formatUnits(balanceData?.value ?? BigInt(0), balanceData?.decimals ?? 18)}
+              symbol={balanceData?.symbol}
+            />
           </Tag>
         </FlexCustom>
       </Card>

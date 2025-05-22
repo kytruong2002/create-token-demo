@@ -1,4 +1,4 @@
-import { NATIVE_SYMBOL } from '@/config/chain'
+import { NATIVE_DECIMAL, NATIVE_SYMBOL } from '@/config/chain'
 import { useGlobalDataContext } from '@/contexts/globalData'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -8,7 +8,7 @@ import { Button, Card, Col, Flex, Form, Input, Row, Tag, Upload, type FormProps,
 import { useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
-import { formatEther, parseEther } from 'viem'
+import { formatUnits, parseUnits } from 'viem'
 import { useBalance, usePublicClient, useWriteContract } from 'wagmi'
 import { Controller, useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -64,10 +64,10 @@ const Home = () => {
       args: [
         name,
         symbol,
-        parseEther(initialSupply?.toString() || '0'),
-        parseEther(maxSupply?.toString() || '0'),
-        parseEther(amountPerMint?.toString() || '0'),
-        parseEther(mintFee?.toString() || '0')
+        parseUnits(initialSupply?.toString() || '0', NATIVE_DECIMAL),
+        parseUnits(maxSupply?.toString() || '0', NATIVE_DECIMAL),
+        parseUnits(amountPerMint?.toString() || '0', NATIVE_DECIMAL),
+        parseUnits(mintFee?.toString() || '0', NATIVE_DECIMAL)
       ],
       account: address
     }
@@ -97,7 +97,9 @@ const Home = () => {
     const balanceDecimal = new Decimal(balance.toString())
     const feeGasDecimal = new Decimal(feeGas.toString())
     if (balanceDecimal.lessThan(feeGasDecimal)) {
-      toast.error(`Not enough ${NATIVE_SYMBOL}. You need ${formatEther(feeGas)}, but only have ${formatEther(balance)}`)
+      toast.error(
+        `Not enough ${NATIVE_SYMBOL}. You need ${formatUnits(feeGas, balanceData?.decimals ?? 18)}, but only have ${formatUnits(balance, balanceData?.decimals ?? 18)}`
+      )
       return
     }
 
@@ -279,7 +281,7 @@ const Home = () => {
           <FlexCustom justify='flex-end' align='center' gap={10}>
             <span>Estimated gas fee: </span>
             <Tag bordered={false} color='volcano'>
-              <FormatToken token={formatEther(feeGas)} symbol={NATIVE_SYMBOL} />
+              <FormatToken token={formatUnits(feeGas, balanceData?.decimals ?? 18)} symbol={NATIVE_SYMBOL} />
             </Tag>
           </FlexCustom>
           <Flex justify='end'>

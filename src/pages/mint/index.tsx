@@ -5,7 +5,7 @@ import { shortenAddress } from '@/utils/helpers'
 import { CustomParagraph, FlexCustom } from '@/utils/styles'
 import { Button, Card, Form, Tag } from 'antd'
 import { toast } from 'react-toastify'
-import { formatEther, formatUnits, type Abi } from 'viem'
+import { formatUnits, type Abi } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
 import { useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
@@ -67,7 +67,7 @@ const Mint = () => {
 
       if (balanceDecimal.lessThan(feeGasDecimal.times(minFeeDecimal))) {
         toast.error(
-          `Not enough ${NATIVE_SYMBOL}. You need ${formatEther(totalGas)}, but only have ${formatEther(balance)}`
+          `Not enough ${NATIVE_SYMBOL}. You need ${formatUnits(totalGas, balanceData?.decimals ?? 18)}, but only have ${formatUnits(balance, balanceData?.decimals ?? 18)}`
         )
         return false
       }
