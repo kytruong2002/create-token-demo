@@ -5,15 +5,18 @@ import { shortenAddress } from '@/utils/helpers'
 import { CustomParagraph, FlexCustom } from '@/utils/styles'
 import { Button, Card, Form, Tag } from 'antd'
 import { toast } from 'react-toastify'
-import { formatUnits } from 'viem'
+import { formatEther, formatUnits, type Abi } from 'viem'
 import { waitForTransactionReceipt } from 'wagmi/actions'
-import { useReadContract, useWriteContract } from 'wagmi'
+import { useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import { useGlobalDataContext } from '@/contexts/globalData'
+import Decimal from 'decimal.js'
+import { NATIVE_SYMBOL } from '@/config/chain'
+import { useERC20TokenInfo } from '@/hooks/useERC20TokenInfo'
 
 const Mint = () => {
   document.title = 'Mint'
-  const paramsContract = {
+  const standardERC20 = {
     address: CONTRACRT_ADDRESS,
     abi: Standard_ERC20_ABI
   }
@@ -21,49 +24,81 @@ const Mint = () => {
   const { setIsLoading } = useGlobalDataContext()
   const { checkNetwork } = useConnectWallet()
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
-    ...paramsContract,
+    ...standardERC20,
     functionName: 'totalSupply'
   })
-  const { data: maxSupply } = useReadContract({
-    ...paramsContract,
-    functionName: 'maxSupply'
-  })
-  const { data: name } = useReadContract({
-    ...paramsContract,
-    functionName: 'name'
-  })
-  const { data: symbol } = useReadContract({
-    ...paramsContract,
-    functionName: 'symbol'
-  })
-  const { data: decimals } = useReadContract({
-    ...paramsContract,
-    functionName: 'decimals'
-  })
-  const { data: amountPerMint } = useReadContract({
-    ...paramsContract,
-    functionName: 'amountPerMint'
-  })
-  const { data: mintFee } = useReadContract({
-    ...paramsContract,
-    functionName: 'mintFee'
+  const tokenInfo = useERC20TokenInfo({
+    address: standardERC20.address,
+    abi: standardERC20.abi as Abi
   })
 
+  const { address } = useConnectWallet()
+  const { data: balanceData } = useBalance({ address })
   const { writeContractAsync } = useWriteContract()
+  const publicClient = usePublicClient()
+
+  const getStandardERC20 = (fee: bigint) => {
+    return {
+      ...standardERC20,
+      functionName: 'mint',
+      value: fee,
+      account: address
+    }
+  }
+
+  const checkFeeGas = async (fee: bigint) => {
+    try {
+      const balance = balanceData?.value ?? BigInt(0)
+      const balanceDecimal = new Decimal(balance.toString())
+      if (balanceDecimal.lessThanOrEqualTo(new Decimal(0))) {
+        toast.error(`Not enough ${NATIVE_SYMBOL}`)
+        return false
+      }
+      const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
+      const gasEstimated = (await publicClient?.estimateContractGas(getStandardERC20(fee))) ?? BigInt(0)
+
+      const gasPriceDecimal = new Decimal(gasPrice.toString())
+      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
+      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
+
+      const minFeeDecimal = new Decimal(fee.toString())
+      const totalGasDecimal = feeGasDecimal.plus(minFeeDecimal)
+      const totalGas = BigInt(totalGasDecimal.toFixed(0))
+
+      if (balanceDecimal.lessThan(feeGasDecimal.times(minFeeDecimal))) {
+        toast.error(
+          `Not enough ${NATIVE_SYMBOL}. You need ${formatEther(totalGas)}, but only have ${formatEther(balance)}`
+        )
+        return false
+      }
+      return true
+    } catch (error) {
+      console.error('Error estimating gas:', error)
+      return false
+    }
+  }
 
   const handleMint = async () => {
     if (
       typeof totalSupply === 'bigint' &&
-      typeof maxSupply === 'bigint' &&
-      typeof mintFee === 'bigint' &&
-      typeof amountPerMint === 'bigint' &&
+      typeof tokenInfo?.maxSupply === 'bigint' &&
+      typeof tokenInfo.amountPerMint === 'bigint' &&
+      typeof tokenInfo.mintFee === 'bigint' &&
       checkNetwork()
     ) {
-      const total = BigInt(totalSupply)
-      const amount = BigInt(amountPerMint)
-      const max = BigInt(maxSupply)
+      const fee = BigInt(tokenInfo.mintFee)
+      const isValid = await checkFeeGas(fee)
+      if (!isValid) return
 
-      if (total + amount > max) {
+      const total = BigInt(totalSupply)
+      const amount = BigInt(tokenInfo.amountPerMint)
+      const max = BigInt(tokenInfo.maxSupply)
+
+      const totalDecimal = new Decimal(total.toString())
+      const amountDecimal = new Decimal(amount.toString())
+      const maxDecimal = new Decimal(max.toString())
+
+      if (totalDecimal.plus(amountDecimal).greaterThan(maxDecimal)) {
         toast.error('Total supply exceeded max supply')
         return
       }
@@ -71,9 +106,9 @@ const Mint = () => {
       try {
         setIsLoading(true)
         const hash = await writeContractAsync({
-          ...paramsContract,
+          ...standardERC20,
           functionName: 'mint',
-          value: BigInt(mintFee)
+          value: fee
         })
 
         const receipt = await waitForTransactionReceipt(wagmiConfig, {
@@ -115,43 +150,43 @@ const Mint = () => {
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Name:</span>
           <Tag bordered={false} color='cyan'>
-            {name as string}
+            {tokenInfo && tokenInfo.name}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Symbol:</span>
           <Tag bordered={false} color='cyan'>
-            {symbol as string}
+            {tokenInfo && tokenInfo.symbol}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Decimals:</span>
           <Tag bordered={false} color='cyan'>
-            {decimals as number}
+            {tokenInfo && tokenInfo.decimals}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Total Supply:</span>
           <Tag bordered={false} color='cyan'>
-            {formatUnits((totalSupply as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+            {formatUnits((totalSupply as bigint) ?? BigInt(0), (tokenInfo?.decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Max Supply:</span>
           <Tag bordered={false} color='cyan'>
-            {formatUnits((maxSupply as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+            {formatUnits((tokenInfo?.maxSupply as bigint) ?? BigInt(0), (tokenInfo?.decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Amount Per Mint:</span>
           <Tag bordered={false} color='cyan'>
-            {formatUnits((amountPerMint as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+            {formatUnits((tokenInfo?.amountPerMint as bigint) ?? BigInt(0), (tokenInfo?.decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Mint Fee:</span>
           <Tag bordered={false} color='cyan'>
-            {formatUnits((mintFee as bigint) ?? BigInt(0), (decimals as number) ?? 18)}
+            {formatUnits((tokenInfo?.mintFee as bigint) ?? BigInt(0), (tokenInfo?.decimals as number) ?? 18)}
           </Tag>
         </FlexCustom>
       </Card>

@@ -7,13 +7,3 @@ export const shortenAddress = (address: `0x${string}`, startLength = 4, endLengt
   const end = address.slice(-endLength)
   return `${start}...${end}`
 }
-
-export const checkValueNumber = (value: string) => {
-  if (isNaN(Number(value))) {
-    return Promise.reject('Value must be a number')
-  }
-  if (Number(value) <= 0) {
-    return Promise.reject('Value must be greater than 0')
-  }
-  return Promise.resolve()
-}

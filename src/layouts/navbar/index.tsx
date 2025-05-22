@@ -1,4 +1,4 @@
-import { BtnSwitchChain } from '@/components'
+import { BtnSwitchChain, FormatToken } from '@/components'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import { NAVBAR_ITEM } from '@/utils/const'
 import { shortenAddress } from '@/utils/helpers'
@@ -51,9 +51,7 @@ const Navbar = () => {
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Wallet Balance:</span>
           <Tag bordered={false} color='cyan'>
-            <span>
-              {Number(formatEther(balanceData?.value ?? BigInt(0))).toFixed(8)} {balanceData?.symbol}
-            </span>
+            <FormatToken token={formatEther(balanceData?.value ?? BigInt(0))} symbol={balanceData?.symbol} />
           </Tag>
         </FlexCustom>
       </Card>

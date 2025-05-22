@@ -1,10 +1,8 @@
 import { NATIVE_SYMBOL } from '@/config/chain'
-import { wagmiConfig } from '@/config/wagmi'
 import { useGlobalDataContext } from '@/contexts/globalData'
 import { factoryContract } from '@/contracts'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import tokenService from '@/services/tokenService'
-import { RULES } from '@/utils/const'
 import { FlexCustom } from '@/utils/styles'
 import { Button, Card, Col, Flex, Form, Input, Row, Tag, Upload, type FormProps, type UploadFile } from 'antd'
 import { useRef, useState } from 'react'
@@ -12,15 +10,19 @@ import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { formatEther, parseEther } from 'viem'
 import { useBalance, usePublicClient, useWriteContract } from 'wagmi'
-import { waitForTransactionReceipt } from 'wagmi/actions'
+import { Controller, useForm } from 'react-hook-form'
+import { yupResolver } from '@hookform/resolvers/yup'
+import Decimal from 'decimal.js'
+import { tokenSchema } from '@/schemas/tokenSchema'
+import { FormatToken } from '@/components'
 
 type FieldTokenType = {
   name?: string
   symbol?: string
-  maxSupply?: string
-  initialSupply?: string
-  amountPerMint?: string
-  mintFee?: string
+  maxSupply?: number
+  initialSupply?: number
+  amountPerMint?: number
+  mintFee?: number
   description?: string
   image?: UploadFile[]
 }
@@ -36,15 +38,14 @@ const Home = () => {
   document.title = 'Create Token'
   const publicClient = usePublicClient()
   const { writeContractAsync } = useWriteContract()
-  const initValueFormToken: FieldTokenType = {
-    name: 'MyToken',
-    symbol: 'MTK',
-    initialSupply: '1000000',
-    maxSupply: '10000000',
-    amountPerMint: '1000',
-    mintFee: '0.000001',
-    description: ''
-  }
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm({
+    resolver: yupResolver(tokenSchema)
+  })
   const [feeGas, setFeeGas] = useState<bigint>(BigInt(0))
   const { address, checkNetwork } = useConnectWallet()
   const [form] = Form.useForm()
@@ -53,7 +54,7 @@ const Home = () => {
   const { setIsLoading } = useGlobalDataContext()
   const lastValuesRef = useRef<Partial<FieldTokenType>>({})
 
-  const getParamsABI = (values: FieldTokenType) => {
+  const getStandardERC20 = (values: FieldTokenType) => {
     const { name, symbol, maxSupply, initialSupply, amountPerMint, mintFee } = values
 
     return {
@@ -63,10 +64,10 @@ const Home = () => {
       args: [
         name,
         symbol,
-        parseEther(initialSupply as string),
-        parseEther(maxSupply as string),
-        parseEther(amountPerMint as string),
-        parseEther(mintFee as string)
+        parseEther(initialSupply?.toString() || '0'),
+        parseEther(maxSupply?.toString() || '0'),
+        parseEther(amountPerMint?.toString() || '0'),
+        parseEther(mintFee?.toString() || '0')
       ],
       account: address
     }
@@ -75,8 +76,12 @@ const Home = () => {
   const getFeeGas = async (values: FieldTokenType) => {
     try {
       const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-      const gasEstimated = (await publicClient?.estimateContractGas(getParamsABI(values))) ?? BigInt(0)
-      setFeeGas(gasEstimated * gasPrice)
+      const gasEstimated = (await publicClient?.estimateContractGas(getStandardERC20(values))) ?? BigInt(0)
+
+      const gasPriceDecimal = new Decimal(gasPrice.toString())
+      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
+      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
+      setFeeGas(BigInt(feeGasDecimal.toFixed(0)))
     } catch (error) {
       console.error('Error estimating gas:', error)
     }
@@ -89,23 +94,23 @@ const Home = () => {
     }
 
     const balance = balanceData?.value ?? BigInt(0)
-    if (balance < feeGas) {
-      const balanceBNB = formatEther(balance)
-      const neededBNB = formatEther(feeGas)
-      toast.error(`Not enough ${NATIVE_SYMBOL}. You need ${neededBNB}, but only have ${balanceBNB}`)
+    const balanceDecimal = new Decimal(balance.toString())
+    const feeGasDecimal = new Decimal(feeGas.toString())
+    if (balanceDecimal.lessThan(feeGasDecimal)) {
+      toast.error(`Not enough ${NATIVE_SYMBOL}. You need ${formatEther(feeGas)}, but only have ${formatEther(balance)}`)
       return
     }
 
     if (!checkNetwork()) return
     try {
       setIsLoading(true)
-      const hash = await writeContractAsync(getParamsABI(values))
+      const hash = await writeContractAsync(getStandardERC20(values))
 
-      const receipt = await waitForTransactionReceipt(wagmiConfig, {
+      const receipt = await publicClient?.waitForTransactionReceipt({
         hash: hash
       })
 
-      if (receipt.status === 'success') {
+      if (receipt?.status === 'success') {
         const formData = new FormData()
         formData.append('txHash', receipt.transactionHash)
         formData.append('description', values.description as string)
@@ -161,46 +166,84 @@ const Home = () => {
       <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
         <Form
           name='createToken'
-          initialValues={initValueFormToken}
-          onFinish={onFinish}
+          onFinish={handleSubmit(onFinish)}
           onFieldsChange={handleFieldsChange}
           layout='vertical'
           form={form}
         >
           <Row gutter={[16, 0]}>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='name' name='name' rules={RULES.name}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='name'
+                name='name'
+                validateStatus={errors.name ? 'error' : ''}
+                help={errors.name?.message}
+              >
+                <Controller name='name' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='symbol' name='symbol' rules={RULES.symbol}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='symbol'
+                name='symbol'
+                validateStatus={errors.symbol ? 'error' : ''}
+                help={errors.symbol?.message}
+              >
+                <Controller name='symbol' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='maxSupply' name='maxSupply' rules={RULES.maxSupply}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='Max Supply'
+                name='maxSupply'
+                validateStatus={errors.maxSupply ? 'error' : ''}
+                help={errors.maxSupply?.message}
+              >
+                <Controller name='maxSupply' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='initialSupply' name='initialSupply' rules={RULES.initialSupply}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='Initial Supply'
+                name='initialSupply'
+                validateStatus={errors.initialSupply ? 'error' : ''}
+                help={errors.initialSupply?.message}
+              >
+                <Controller name='initialSupply' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='amountPerMint' name='amountPerMint' rules={RULES.amountPerMint}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='Amount Per Mint'
+                name='amountPerMint'
+                validateStatus={errors.amountPerMint ? 'error' : ''}
+                help={errors.amountPerMint?.message}
+              >
+                <Controller name='amountPerMint' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='mintFee' name='mintFee' rules={RULES.mintFee}>
-                <Input />
+              <Form.Item<FieldTokenType>
+                label='Mint Fee'
+                name='mintFee'
+                validateStatus={errors.mintFee ? 'error' : ''}
+                help={errors.mintFee?.message}
+              >
+                <Controller name='mintFee' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
-              <Form.Item<FieldTokenType> label='description' name='description' rules={RULES.description}>
-                <Input.TextArea rows={4} />
+              <Form.Item<FieldTokenType>
+                label='description'
+                name='description'
+                validateStatus={errors.description ? 'error' : ''}
+                help={errors.description?.message}
+              >
+                <Controller
+                  name='description'
+                  control={control}
+                  render={({ field }) => <Input.TextArea {...field} rows={4} />}
+                />
               </Form.Item>
             </Col>
             <Col xs={24} md={12}>
@@ -213,7 +256,7 @@ const Home = () => {
                   setFileList(newFileList)
                   return newFileList
                 }}
-                rules={RULES.image}
+                rules={[{ required: true, message: 'Please upload a token image!' }]}
               >
                 <UploadCustom
                   name='image'
@@ -236,7 +279,7 @@ const Home = () => {
           <FlexCustom justify='flex-end' align='center' gap={10}>
             <span>Estimated gas fee: </span>
             <Tag bordered={false} color='volcano'>
-              {formatEther(feeGas)} {NATIVE_SYMBOL}
+              <FormatToken token={formatEther(feeGas)} symbol={NATIVE_SYMBOL} />
             </Tag>
           </FlexCustom>
           <Flex justify='end'>
