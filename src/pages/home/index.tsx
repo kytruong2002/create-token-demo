@@ -5,7 +5,7 @@ import { useConnectWallet } from '@/hooks/useConnectWallet'
 import tokenService from '@/services/tokenService'
 import { FlexCustom } from '@/utils/styles'
 import { Button, Card, Col, Flex, Form, Input, Row, Tag, Upload, type FormProps, type UploadFile } from 'antd'
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import { toast } from 'react-toastify'
 import styled from 'styled-components'
 import { formatUnits, parseUnits } from 'viem'
@@ -42,17 +42,21 @@ const Home = () => {
   const {
     control,
     handleSubmit,
+    watch,
     formState: { errors }
   } = useForm({
     resolver: yupResolver(tokenSchema)
   })
+
   const [feeGas, setFeeGas] = useState<bigint>(BigInt(0))
   const { address, checkNetwork } = useConnectWallet()
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
   const { setIsLoading } = useGlobalDataContext()
-  const lastValuesRef = useRef<Partial<FieldTokenType>>({})
+  const lastValuesRef = useRef<string>('')
+
+  const watchedValues = watch(['name', 'symbol', 'maxSupply', 'initialSupply', 'amountPerMint', 'mintFee'])
 
   const getStandardERC20 = (values: FieldTokenType) => {
     const { name, symbol, maxSupply, initialSupply, amountPerMint, mintFee } = values
@@ -73,19 +77,51 @@ const Home = () => {
     }
   }
 
-  const getFeeGas = async (values: FieldTokenType) => {
-    try {
-      const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-      const gasEstimated = (await publicClient?.estimateContractGas(getStandardERC20(values))) ?? BigInt(0)
+  const getFeeGas = useCallback(
+    async (values: FieldTokenType) => {
+      try {
+        if (!publicClient || !address) return
 
-      const gasPriceDecimal = new Decimal(gasPrice.toString())
-      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
-      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
-      setFeeGas(BigInt(feeGasDecimal.toFixed(0)))
-    } catch (error) {
-      console.error('Error estimating gas:', error)
+        const gasPrice = (await publicClient.getGasPrice()) ?? BigInt(0)
+        const gasEstimated = (await publicClient.estimateContractGas(getStandardERC20(values))) ?? BigInt(0)
+
+        const gasPriceDecimal = new Decimal(gasPrice.toString())
+        const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
+        const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
+        setFeeGas(BigInt(feeGasDecimal.toFixed(0)))
+      } catch (error) {
+        console.error('Error estimating gas:', error)
+        setFeeGas(BigInt(0))
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [publicClient, address]
+  )
+
+  useEffect(() => {
+    const [name, symbol, maxSupply, initialSupply, amountPerMint, mintFee] = watchedValues
+
+    if (name && symbol && maxSupply && initialSupply && amountPerMint !== undefined && mintFee !== undefined) {
+      const currentValues = JSON.stringify({ name, symbol, maxSupply, initialSupply, amountPerMint, mintFee })
+
+      if (currentValues !== lastValuesRef.current) {
+        lastValuesRef.current = currentValues
+
+        const values: FieldTokenType = {
+          name,
+          symbol,
+          maxSupply: Number(maxSupply),
+          initialSupply: Number(initialSupply),
+          amountPerMint: Number(amountPerMint),
+          mintFee: Number(mintFee)
+        }
+
+        getFeeGas(values)
+      }
+    } else {
+      setFeeGas(BigInt(0))
     }
-  }
+  }, [watchedValues, getFeeGas])
 
   const onFinish: FormProps<FieldTokenType>['onFinish'] = async (values) => {
     if (!address) {
@@ -124,6 +160,7 @@ const Home = () => {
         toast.success(`🎉 ${res.message}`)
         form.resetFields()
         setFileList([])
+        setFeeGas(BigInt(0))
       } else {
         toast.error('Create token failed!')
       }
@@ -135,44 +172,10 @@ const Home = () => {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleFieldsChange = (_: unknown, allFields: any[]) => {
-    const values: Record<string, unknown> = {}
-    allFields.forEach((field) => {
-      values[field.name[0]] = field.value
-    })
-
-    const requiredFields: (keyof FieldTokenType)[] = [
-      'name',
-      'symbol',
-      'maxSupply',
-      'initialSupply',
-      'amountPerMint',
-      'mintFee'
-    ]
-    const allFilled = requiredFields.every((key) => !!values[key])
-
-    if (allFilled) {
-      const lastValues = lastValuesRef.current
-      const isSame = requiredFields.every((key) => lastValues[key] === values[key])
-
-      if (!isSame) {
-        lastValuesRef.current = values
-        getFeeGas(values)
-      }
-    }
-  }
-
   return (
     <>
       <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
-        <Form
-          name='createToken'
-          onFinish={handleSubmit(onFinish)}
-          onFieldsChange={handleFieldsChange}
-          layout='vertical'
-          form={form}
-        >
+        <Form name='createToken' onFinish={handleSubmit(onFinish)} layout='vertical' form={form}>
           <Row gutter={[16, 0]}>
             <Col xs={24} md={12}>
               <Form.Item<FieldTokenType>
