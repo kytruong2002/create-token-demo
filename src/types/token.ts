@@ -2,9 +2,11 @@ export interface Token {
   _id?: string
   name: string
   symbol: string
-  decimals: number
-  supply: number
+  maxSupply: string
+  amountPerMint: string
+  tokenAddress: string
   description: string
+  mintFee: string
   websiteUrl?: string
   telegramUrl?: string
   discordUrl?: string

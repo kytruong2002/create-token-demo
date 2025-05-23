@@ -1,135 +1,21 @@
-import { wagmiConfig } from '@/config/wagmi'
-import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
-import { CONTRACRT_ADDRESS } from '@/utils/const'
+import { PATH } from '@/utils/const'
 import { shortenAddress } from '@/utils/helpers'
 import { CustomParagraph, FlexCustom } from '@/utils/styles'
-import { Button, Card, Form, Tag } from 'antd'
-import { toast } from 'react-toastify'
-import { formatUnits, type Abi } from 'viem'
-import { waitForTransactionReceipt } from 'wagmi/actions'
-import { useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
-import { useConnectWallet } from '@/hooks/useConnectWallet'
-import { useGlobalDataContext } from '@/contexts/globalData'
-import Decimal from 'decimal.js'
-import { NATIVE_SYMBOL } from '@/config/chain'
-import { useERC20TokenInfo } from '@/hooks/useERC20TokenInfo'
+import { Button, Card, Tag } from 'antd'
+import { formatUnits } from 'viem'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useMintToken } from '@/hooks/useMintToken'
 
 const Mint = () => {
-  document.title = 'Mint'
-  const standardERC20 = {
-    address: CONTRACRT_ADDRESS,
-    abi: Standard_ERC20_ABI
-  }
-  const [form] = Form.useForm()
-  const { setIsLoading } = useGlobalDataContext()
-  const { checkNetwork } = useConnectWallet()
-  const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
-    ...standardERC20,
-    functionName: 'totalSupply'
-  })
-  const tokenInfo = useERC20TokenInfo({
-    address: standardERC20.address,
-    abi: standardERC20.abi as Abi
-  })
+  const { contract } = useParams<{ contract: `0x${string}` }>()
+  const navigate = useNavigate()
+  useEffect(() => {
+    document.title = 'Mint'
+    if (!contract) navigate(PATH.LIST_TOKEN)
+  }, [contract, navigate])
 
-  const { address } = useConnectWallet()
-  const { data: balanceData } = useBalance({ address })
-  const { writeContractAsync } = useWriteContract()
-  const publicClient = usePublicClient()
-
-  const getStandardERC20 = (fee: bigint) => {
-    return {
-      ...standardERC20,
-      functionName: 'mint',
-      value: fee,
-      account: address
-    }
-  }
-
-  const checkFeeGas = async (fee: bigint) => {
-    try {
-      const balance = balanceData?.value ?? BigInt(0)
-      const balanceDecimal = new Decimal(balance.toString())
-      if (balanceDecimal.lessThanOrEqualTo(new Decimal(0))) {
-        toast.error(`Not enough ${NATIVE_SYMBOL}`)
-        return false
-      }
-      const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-      const gasEstimated = (await publicClient?.estimateContractGas(getStandardERC20(fee))) ?? BigInt(0)
-
-      const gasPriceDecimal = new Decimal(gasPrice.toString())
-      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
-      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
-
-      const minFeeDecimal = new Decimal(fee.toString())
-      const totalGasDecimal = feeGasDecimal.plus(minFeeDecimal)
-      const totalGas = BigInt(totalGasDecimal.toFixed(0))
-
-      if (balanceDecimal.lessThan(feeGasDecimal.times(minFeeDecimal))) {
-        toast.error(
-          `Not enough ${NATIVE_SYMBOL}. You need ${formatUnits(totalGas, balanceData?.decimals ?? 18)}, but only have ${formatUnits(balance, balanceData?.decimals ?? 18)}`
-        )
-        return false
-      }
-      return true
-    } catch (error) {
-      console.error('Error estimating gas:', error)
-      return false
-    }
-  }
-
-  const handleMint = async () => {
-    if (
-      typeof totalSupply === 'bigint' &&
-      typeof tokenInfo?.maxSupply === 'bigint' &&
-      typeof tokenInfo.amountPerMint === 'bigint' &&
-      typeof tokenInfo.mintFee === 'bigint' &&
-      checkNetwork()
-    ) {
-      const fee = BigInt(tokenInfo.mintFee)
-      const isValid = await checkFeeGas(fee)
-      if (!isValid) return
-
-      const total = BigInt(totalSupply)
-      const amount = BigInt(tokenInfo.amountPerMint)
-      const max = BigInt(tokenInfo.maxSupply)
-
-      const totalDecimal = new Decimal(total.toString())
-      const amountDecimal = new Decimal(amount.toString())
-      const maxDecimal = new Decimal(max.toString())
-
-      if (totalDecimal.plus(amountDecimal).greaterThan(maxDecimal)) {
-        toast.error('Total supply exceeded max supply')
-        return
-      }
-
-      try {
-        setIsLoading(true)
-        const hash = await writeContractAsync({
-          ...standardERC20,
-          functionName: 'mint',
-          value: fee
-        })
-
-        const receipt = await waitForTransactionReceipt(wagmiConfig, {
-          hash: hash
-        })
-
-        if (receipt.status === 'success') {
-          toast.success('Mint transaction sent successfully!')
-          await refetchTotalSupply()
-          form.resetFields()
-        } else {
-          toast.error('Mint transaction failed!')
-        }
-      } catch (error) {
-        console.error('Error:', error)
-        toast.error('Mint transaction failed!')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-  }
+  const { handleMint, tokenInfo, totalSupply } = useMintToken(contract!)
 
   return (
     <>
@@ -142,9 +28,7 @@ const Mint = () => {
         <FlexCustom justify='space-between' align='center' gap={10}>
           <span>Conntract Address:</span>
           <Tag bordered={false} color='cyan'>
-            <CustomParagraph copyable={{ text: CONTRACRT_ADDRESS }}>
-              {shortenAddress(CONTRACRT_ADDRESS!)}
-            </CustomParagraph>
+            <CustomParagraph copyable={{ text: contract }}>{shortenAddress(contract!)}</CustomParagraph>
           </Tag>
         </FlexCustom>
         <FlexCustom justify='space-between' align='center' gap={10}>
