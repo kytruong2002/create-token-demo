@@ -192,6 +192,7 @@ const Home = () => {
                 name='name'
                 validateStatus={errors.name ? 'error' : ''}
                 help={errors.name?.message}
+                required
               >
                 <Controller name='name' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -202,6 +203,7 @@ const Home = () => {
                 name='symbol'
                 validateStatus={errors.symbol ? 'error' : ''}
                 help={errors.symbol?.message}
+                required
               >
                 <Controller name='symbol' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -212,6 +214,7 @@ const Home = () => {
                 name='maxSupply'
                 validateStatus={errors.maxSupply ? 'error' : ''}
                 help={errors.maxSupply?.message}
+                required
               >
                 <Controller name='maxSupply' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -222,6 +225,7 @@ const Home = () => {
                 name='initialSupply'
                 validateStatus={errors.initialSupply ? 'error' : ''}
                 help={errors.initialSupply?.message}
+                required
               >
                 <Controller name='initialSupply' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -232,6 +236,7 @@ const Home = () => {
                 name='amountPerMint'
                 validateStatus={errors.amountPerMint ? 'error' : ''}
                 help={errors.amountPerMint?.message}
+                required
               >
                 <Controller name='amountPerMint' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -242,6 +247,7 @@ const Home = () => {
                 name='mintFee'
                 validateStatus={errors.mintFee ? 'error' : ''}
                 help={errors.mintFee?.message}
+                required
               >
                 <Controller name='mintFee' control={control} render={({ field }) => <Input {...field} />} />
               </Form.Item>
@@ -252,6 +258,7 @@ const Home = () => {
                 name='description'
                 validateStatus={errors.description ? 'error' : ''}
                 help={errors.description?.message}
+                required
               >
                 <Controller
                   name='description'
