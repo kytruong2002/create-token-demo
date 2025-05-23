@@ -45,7 +45,16 @@ const Home = () => {
     watch,
     formState: { errors }
   } = useForm({
-    resolver: yupResolver(tokenSchema)
+    resolver: yupResolver(tokenSchema),
+    defaultValues: {
+      description: 'abc',
+      name: 'ABToken',
+      symbol: 'ABT',
+      amountPerMint: 1000,
+      initialSupply: 100000,
+      maxSupply: 1000000,
+      mintFee: 0
+    }
   })
 
   const [feeGas, setFeeGas] = useState<bigint>(BigInt(0))
