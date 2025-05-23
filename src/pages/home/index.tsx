@@ -188,7 +188,7 @@ const Home = () => {
           <Row gutter={[16, 0]}>
             <Col xs={24} md={12}>
               <Form.Item<FieldTokenType>
-                label='name'
+                label='Name'
                 name='name'
                 validateStatus={errors.name ? 'error' : ''}
                 help={errors.name?.message}
@@ -198,7 +198,7 @@ const Home = () => {
             </Col>
             <Col xs={24} md={12}>
               <Form.Item<FieldTokenType>
-                label='symbol'
+                label='Symbol'
                 name='symbol'
                 validateStatus={errors.symbol ? 'error' : ''}
                 help={errors.symbol?.message}
