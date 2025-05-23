@@ -16,9 +16,9 @@ const FormatToken = ({ token, symbol }: FormatTokenProps) => {
 
   if (!decimalPartRaw || /^0+$/.test(decimalPartRaw)) {
     return (
-      <Tooltip title={`$${valueStr}`}>
+      <Tooltip title={`${valueStr}`}>
         <span>
-          ${intPart}.0 {symbol}
+          {intPart}.0 {symbol}
         </span>
       </Tooltip>
     )
@@ -26,9 +26,9 @@ const FormatToken = ({ token, symbol }: FormatTokenProps) => {
 
   if (isTrailingZeroAfter8) {
     return (
-      <Tooltip title={`$${valueStr}`}>
+      <Tooltip title={`${valueStr}`}>
         <span>
-          ${intPart}.{first8Digits} {symbol}
+          {intPart}.{first8Digits} {symbol}
         </span>
       </Tooltip>
     )
@@ -39,9 +39,9 @@ const FormatToken = ({ token, symbol }: FormatTokenProps) => {
   const rest = decimalPartRaw.slice(firstNonZeroIndex + 1, firstNonZeroIndex + 5)
 
   return (
-    <Tooltip title={`$${valueStr}`}>
+    <Tooltip title={`${valueStr}`}>
       <span>
-        ${intPart}.0<sub style={{ fontSize: '0.8em' }}>{subDigit}</sub>
+        {intPart}.0<sub style={{ fontSize: '0.8em' }}>{subDigit}</sub>
         {rest} {symbol}
       </span>
     </Tooltip>

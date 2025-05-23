@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
-export const BE_URL = 'http://localhost:5035/v1'
+export const BE_URL_SHORT = 'http://localhost:5035'
+export const BE_URL = `${BE_URL_SHORT}/v1`
 export const PATH = {
   HOME: '/',
   LOGIN: '/login',

@@ -1,8 +1,9 @@
+import { FormatToken } from '@/components'
 import { useGlobalDataContext } from '@/contexts/globalData'
 import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import tokenService from '@/services/tokenService'
 import type { PaginationType } from '@/types/api'
-import { BE_URL, LIMIT, PATH } from '@/utils/const'
+import { BE_URL_SHORT, LIMIT, PATH } from '@/utils/const'
 import { Avatar, Card, Table, type TablePaginationConfig, type TableProps } from 'antd'
 import Decimal from 'decimal.js'
 import { useEffect, useState } from 'react'
@@ -51,11 +52,11 @@ const ListToken = () => {
         const totalSupplyDecimal = new Decimal(totalSupply.toString())
         const tokenData: TokenTableType = {
           key: token._id as string,
-          image: BE_URL + token.image,
+          image: BE_URL_SHORT + token.image,
           name: token.name,
           tokenAddress: token.tokenAddress,
           mintProgress: totalSupplyDecimal.div(maxSupplyDecimal).mul(100).toFixed(2) + ' %',
-          supply: balanceDecimal.div(maxSupplyDecimal).mul(100).toFixed(2) + ' %'
+          supply: balanceDecimal.div(maxSupplyDecimal).mul(100).toFixed(18)
         }
         list.push(tokenData)
       }
@@ -82,7 +83,8 @@ const ListToken = () => {
     {
       title: '% of Supply',
       dataIndex: 'supply',
-      key: 'supply'
+      key: 'supply',
+      render: (text) => <FormatToken token={text} />
     },
     {
       title: 'Mint Progress',
