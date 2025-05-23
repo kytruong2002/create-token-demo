@@ -3,7 +3,7 @@ import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import { useMintToken } from '@/hooks/useMintToken'
 import tokenService from '@/services/tokenService'
 import type { PaginationType } from '@/types/api'
-import { BE_URL, CONTRACRT_ADDRESS, LIMIT, PATH } from '@/utils/const'
+import { BE_URL, LIMIT, PATH } from '@/utils/const'
 import { Avatar, Button, Card, Table, type TablePaginationConfig, type TableProps } from 'antd'
 import Decimal from 'decimal.js'
 import { useEffect, useRef, useState } from 'react'
@@ -46,7 +46,7 @@ const ListToken = () => {
         const maxSupplyDecimal = new Decimal(token.maxSupply)
         const totalSupply =
           ((await publicClient?.readContract({
-            address: CONTRACRT_ADDRESS,
+            address: token.tokenAddress as `0x${string}`,
             abi: Standard_ERC20_ABI,
             functionName: 'totalSupply'
           })) as bigint) ?? BigInt(0)

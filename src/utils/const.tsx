@@ -18,8 +18,6 @@ export const NAVBAR_ITEM = [
   }
 ]
 
-export const CONTRACRT_ADDRESS: `0x${string}` = '0x60af8349677959701c7973ae8ff2ee173b6fff5a'
-
 export const COLORS = ['default', 'primary', 'danger', 'pink', 'purple', 'cyan']
 
 export const LIMIT = 10
