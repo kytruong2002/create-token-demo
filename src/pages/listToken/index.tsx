@@ -1,12 +1,11 @@
 import { useGlobalDataContext } from '@/contexts/globalData'
 import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
-import { useMintToken } from '@/hooks/useMintToken'
 import tokenService from '@/services/tokenService'
 import type { PaginationType } from '@/types/api'
 import { BE_URL, LIMIT, PATH } from '@/utils/const'
-import { Avatar, Button, Card, Table, type TablePaginationConfig, type TableProps } from 'antd'
+import { Avatar, Card, Table, type TablePaginationConfig, type TableProps } from 'antd'
 import Decimal from 'decimal.js'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { usePublicClient } from 'wagmi'
@@ -33,7 +32,6 @@ const ListToken = () => {
   const { setIsLoading } = useGlobalDataContext()
   const [currentPage, setCurrentPage] = useState<number>(1)
   const publicClient = usePublicClient()
-  const [contractAddress, setContractAddress] = useState<`0x${string}`>()
   const getAllTokens = async (page?: number) => {
     try {
       setIsLoading(true)
@@ -68,16 +66,6 @@ const ListToken = () => {
       setIsLoading(false)
     }
   }
-  const { handleMint } = useMintToken(contractAddress!)
-  const prevAddressRef = useRef<string>(null)
-
-  useEffect(() => {
-    if (contractAddress && contractAddress !== prevAddressRef.current) {
-      prevAddressRef.current = contractAddress
-      handleMint()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contractAddress])
 
   const columns: TableProps<TokenTableType>['columns'] = [
     {
@@ -100,16 +88,6 @@ const ListToken = () => {
       title: 'Mint Progress',
       dataIndex: 'mintProgress',
       key: 'mintProgress'
-    },
-    {
-      title: 'Mint',
-      key: 'tokenAddress',
-      dataIndex: 'tokenAddress',
-      render: (tokenAddress) => (
-        <Button color='cyan' variant='solid' size='middle' onClick={() => setContractAddress(tokenAddress)}>
-          Mint
-        </Button>
-      )
     },
     {
       title: 'Detail',
