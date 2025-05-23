@@ -1,4 +1,4 @@
-import { number, object, string } from 'yup'
+import { number, object, ref, string } from 'yup'
 
 export const tokenSchema = object().shape({
   name: string().required('Name is required'),
@@ -6,7 +6,8 @@ export const tokenSchema = object().shape({
   maxSupply: number()
     .typeError('Max supply must be a number')
     .positive('Max supply must be greater than 0')
-    .required('Max supply is required'),
+    .required('Max supply is required')
+    .min(ref('initialSupply'), 'Max supply must be greater than Initial supply'),
   initialSupply: number()
     .typeError('Initial supply must be a number')
     .positive('Initial supply must be greater than 0')
