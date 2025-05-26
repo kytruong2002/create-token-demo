@@ -12,6 +12,7 @@ const AppRouter = () => {
           <Route index element={<Home />} />
           <Route path={PATH.MINT} element={<Mint />} />
           <Route path={PATH.LIST_TOKEN} element={<ListToken />} />
+          <Route path={PATH.YOUR_TOKEN} element={<ListToken functionName='getByUser' />} />
         </Route>
         <Route path={PATH.HOME} element={<Form />}>
           <Route path={PATH.LOGIN} element={<Login />} />

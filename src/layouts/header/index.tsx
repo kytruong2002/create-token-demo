@@ -1,9 +1,9 @@
+import { useGlobalDataContext } from '@/contexts/globalData'
 import { useConnectWallet } from '@/hooks/useConnectWallet'
 import { PATH } from '@/utils/const'
 import { Container } from '@/utils/styles'
 import { Button, Flex } from 'antd'
-import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 const Title = styled(Button)`
@@ -20,11 +20,7 @@ const HeaderContainer = styled.header`
 
 const Header = () => {
   const { isConnected, handleDisconnect } = useConnectWallet()
-  const location = useLocation()
-  const [title, setTitle] = useState(document.title)
-  useEffect(() => {
-    setTitle(document.title)
-  }, [location.pathname])
+  const { title } = useGlobalDataContext()
 
   return (
     <HeaderContainer>

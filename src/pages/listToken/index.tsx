@@ -27,18 +27,20 @@ const LinkCustom = styled(Link)`
   }
 `
 
-const ListToken = () => {
+const ListToken = ({ functionName = 'getAll' }: { functionName?: 'getAll' | 'getByUser' }) => {
   const [paginationData, setPaginationData] = useState<PaginationType>()
   const [listToken, setListToken] = useState<TokenTableType[]>([])
-  const { setIsLoading } = useGlobalDataContext()
+  const { setIsLoading, setTitle, title } = useGlobalDataContext()
   const [currentPage, setCurrentPage] = useState<number>(1)
   const publicClient = usePublicClient()
+
   const getAllTokens = async (page?: number) => {
     try {
       setIsLoading(true)
-      const { data, pagination } = await tokenService.getAll({ page, limit: LIMIT })
+      const { data, pagination } = await tokenService[functionName]({ page, limit: LIMIT })
       setPaginationData(pagination)
       const list: TokenTableType[] = []
+      if (!Array.isArray(data)) return
       for (const token of data) {
         const balance = (await publicClient?.getBalance({ address: token.tokenAddress as `0x${string}` })) ?? BigInt(0)
         const balanceDecimal = new Decimal(balance?.toString())
@@ -99,16 +101,17 @@ const ListToken = () => {
   ]
 
   useEffect(() => {
-    document.title = 'List Token'
+    document.title = functionName === 'getAll' ? 'List Token' : 'Your Token'
+    setTitle(document.title)
     getAllTokens(currentPage)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage])
+  }, [currentPage, functionName])
 
   const handleTableChange = (pagination: TablePaginationConfig) => {
     setCurrentPage(pagination.current ?? 1)
   }
   return (
-    <Card title={'List Token'.toLocaleUpperCase()} variant='borderless' style={{ marginBottom: 20 }}>
+    <Card title={title.toLocaleUpperCase()} variant='borderless' style={{ marginBottom: 20 }}>
       <Table<TokenTableType>
         columns={columns}
         dataSource={listToken}

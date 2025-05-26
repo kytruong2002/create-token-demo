@@ -22,6 +22,15 @@ const tokenService = {
       }
     })
   },
+  getByUser: (params: PaginationParams = {}): Promise<ApiResponse<Token[]>> => {
+    const { page = 1, limit = LIMIT } = params
+    return api.get(url('user'), {
+      params: {
+        page,
+        limit
+      }
+    })
+  },
   getOne: (address: string): Promise<ApiResponse<Token>> => {
     return api.get(url(address))
   }

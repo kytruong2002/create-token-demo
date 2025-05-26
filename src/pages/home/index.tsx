@@ -35,7 +35,6 @@ const UploadCustom = styled(Upload)`
 `
 
 const Home = () => {
-  document.title = 'Create Token'
   const publicClient = usePublicClient()
   const { writeContractAsync } = useWriteContract()
 
@@ -62,7 +61,7 @@ const Home = () => {
   const [form] = Form.useForm()
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const { data: balanceData } = useBalance({ address })
-  const { setIsLoading } = useGlobalDataContext()
+  const { setIsLoading, setTitle, title } = useGlobalDataContext()
   const lastValuesRef = useRef<string>('')
 
   const watchedValues = watch(['name', 'symbol', 'maxSupply', 'initialSupply', 'amountPerMint', 'mintFee'])
@@ -108,6 +107,8 @@ const Home = () => {
   )
 
   useEffect(() => {
+    document.title = 'Create Token'
+    setTitle(document.title)
     const [name, symbol, maxSupply, initialSupply, amountPerMint, mintFee] = watchedValues
 
     if (name && symbol && maxSupply && initialSupply && amountPerMint !== undefined && mintFee !== undefined) {
@@ -130,7 +131,7 @@ const Home = () => {
     } else {
       setFeeGas(BigInt(0))
     }
-  }, [watchedValues, getFeeGas])
+  }, [watchedValues, getFeeGas, setTitle])
 
   const onFinish: FormProps<FieldTokenType>['onFinish'] = async (values) => {
     if (!address) {
@@ -183,7 +184,7 @@ const Home = () => {
 
   return (
     <>
-      <Card title={'Create Token'.toLocaleUpperCase()} variant='borderless'>
+      <Card title={title.toLocaleUpperCase()} variant='borderless'>
         <Form name='createToken' onFinish={handleSubmit(onFinish)} layout='vertical' form={form}>
           <Row gutter={[16, 0]}>
             <Col xs={24} md={12}>

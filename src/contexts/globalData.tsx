@@ -3,17 +3,22 @@ import React, { useState, createContext, useContext } from 'react'
 interface GlobalDataType {
   isLoading: boolean
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  title: string
+  setTitle: React.Dispatch<React.SetStateAction<string>>
 }
 
 const GlobalDataContext = createContext<GlobalDataType | undefined>(undefined)
 
 export const GlobalDataProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false)
+  const [title, setTitle] = useState('')
   return (
     <GlobalDataContext.Provider
       value={{
         isLoading,
-        setIsLoading
+        setIsLoading,
+        title,
+        setTitle
       }}
     >
       {children}

@@ -6,20 +6,23 @@ import { formatUnits } from 'viem'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useMintToken } from '@/hooks/useMintToken'
+import { useGlobalDataContext } from '@/contexts/globalData'
 
 const Mint = () => {
   const { contract } = useParams<{ contract: `0x${string}` }>()
   const navigate = useNavigate()
+  const { title, setTitle } = useGlobalDataContext()
   useEffect(() => {
     document.title = 'Mint'
+    setTitle(document.title)
     if (!contract) navigate(PATH.LIST_TOKEN)
-  }, [contract, navigate])
+  }, [contract, navigate, setTitle])
 
   const { handleMint, tokenInfo, totalSupply } = useMintToken(contract!)
 
   return (
     <>
-      <Card title={'Mint'.toLocaleUpperCase()} variant='borderless' style={{ marginBottom: 20 }}>
+      <Card title={title.toLocaleUpperCase()} variant='borderless' style={{ marginBottom: 20 }}>
         <Button color='cyan' variant='solid' size='large' style={{ width: '100%' }} onClick={handleMint}>
           Mint
         </Button>

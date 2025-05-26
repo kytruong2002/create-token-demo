@@ -6,7 +6,8 @@ export const PATH = {
   HOME: '/',
   LOGIN: '/login',
   MINT: '/mint/:contract',
-  LIST_TOKEN: '/list'
+  LIST_TOKEN: '/list',
+  YOUR_TOKEN: '/your'
 }
 export const NAVBAR_ITEM = [
   {
@@ -16,6 +17,10 @@ export const NAVBAR_ITEM = [
   {
     label: <Link to={PATH.LIST_TOKEN}>List Token</Link>,
     key: PATH.LIST_TOKEN
+  },
+  {
+    label: <Link to={PATH.YOUR_TOKEN}>Your Token</Link>,
+    key: PATH.YOUR_TOKEN
   }
 ]
 
