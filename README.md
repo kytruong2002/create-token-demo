@@ -5,6 +5,8 @@ This project is a **Demo Create Token** built with **React, TypeScript, Wagmi, V
 - Authentication (Login with wallet)
 - Create New Token
 - Mint
+- List Token
+- Your Token
 
 ## 📦 Installation
 
