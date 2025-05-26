@@ -1,11 +1,13 @@
-import { useMemo } from 'react'
+import { useGlobalDataContext } from '@/contexts/globalData'
+import { useEffect, useMemo } from 'react'
 import type { Abi } from 'viem'
 import { useReadContracts } from 'wagmi'
 
 export function useERC20TokenInfo(standardERC20: { address: `0x${string}`; abi: Abi }) {
   const functionNames = ['maxSupply', 'name', 'symbol', 'decimals', 'amountPerMint', 'mintFee'] as const
+  const { setIsLoading } = useGlobalDataContext()
 
-  const { data } = useReadContracts({
+  const { data, isLoading } = useReadContracts({
     contracts: functionNames.map((fn) => ({
       ...standardERC20,
       functionName: fn
@@ -15,6 +17,10 @@ export function useERC20TokenInfo(standardERC20: { address: `0x${string}`; abi: 
       abi: Abi
     }[]
   })
+
+  useEffect(() => {
+    setIsLoading(isLoading)
+  }, [isLoading, setIsLoading])
 
   const tokenInfo = useMemo(() => {
     if (!data) return null
