@@ -19,10 +19,7 @@ export function useMintToken(contract: `0x${string}`) {
     ...standardERC20,
     functionName: 'totalSupply'
   })
-  const tokenInfo = useStandardTokenInfo({
-    address: standardERC20.address,
-    abi: standardERC20.abi as Abi
-  })
+  const tokenInfo = useStandardTokenInfo(standardERC20 as { address: `0x${string}`; abi: Abi })
 
   const { address } = useConnectWallet()
   const { data: balanceData } = useBalance({ address })
