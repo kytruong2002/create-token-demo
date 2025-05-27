@@ -40,6 +40,7 @@ export function useCreateToken() {
       const functionName = 'createStandardToken'
 
       const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
+      const block = await publicClient?.getBlock({ blockTag: 'latest' })
       const gasLimit =
         (await publicClient?.estimateContractGas({
           ...(factoryContract as { address: `0x${string}`; abi: Abi }),
@@ -47,7 +48,14 @@ export function useCreateToken() {
           args,
           account: address
         })) ?? BigInt(0)
-      if (!checkFeeGas(balanceData?.value ?? BigInt(0), gasLimit, gasPrice)) {
+      if (
+        !checkFeeGas({
+          balance: balanceData?.value ?? BigInt(0),
+          gasLimit,
+          gasPrice,
+          baseFeePerGas: block?.baseFeePerGas ?? undefined
+        })
+      ) {
         toast.error('Insufficient balance for gas fees.')
         return
       }

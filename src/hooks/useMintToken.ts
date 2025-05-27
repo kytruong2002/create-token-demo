@@ -40,7 +40,7 @@ export function useMintToken(contract: `0x${string}`) {
         const fee = BigInt(tokenInfo.mintFee)
 
         if (!checkBalance(balanceData?.value ?? BigInt(0), fee)) {
-          toast.error('Insufficient balance')
+          toast.error('Insufficient balance for mint fee')
           return
         }
 
@@ -52,7 +52,15 @@ export function useMintToken(contract: `0x${string}`) {
             value: fee,
             account: address
           })) ?? BigInt(0)
-        if (!checkFeeGas(balanceData?.value ?? BigInt(0), gasLimit, gasPrice)) {
+        const block = await publicClient?.getBlock({ blockTag: 'latest' })
+        if (
+          !checkFeeGas({
+            balance: balanceData?.value ?? BigInt(0),
+            gasLimit,
+            gasPrice,
+            baseFeePerGas: block?.baseFeePerGas ?? undefined
+          })
+        ) {
           toast.error('Insufficient balance for gas fees.')
           return
         }
