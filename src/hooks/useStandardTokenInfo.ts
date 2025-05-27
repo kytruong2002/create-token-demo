@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react'
 import type { Abi } from 'viem'
 import { useReadContracts } from 'wagmi'
 
-export function useERC20TokenInfo(standardERC20: { address: `0x${string}`; abi: Abi }) {
+export function useStandardTokenInfo(standardERC20: { address: `0x${string}`; abi: Abi }) {
   const functionNames = ['maxSupply', 'name', 'symbol', 'decimals', 'amountPerMint', 'mintFee'] as const
   const { setIsLoading } = useGlobalDataContext()
 
