@@ -22,5 +22,5 @@ export const checkFeeGas = (balance: bigint, gasLimit: bigint, gasPrice: bigint)
   const feeGas = gasLimitDecimal.times(gasPriceDecimal)
 
   const balanceDecimal = new Decimal(balance.toString())
-  return balanceDecimal.greaterThan(feeGas)
+  return balanceDecimal.greaterThanOrEqualTo(feeGas)
 }

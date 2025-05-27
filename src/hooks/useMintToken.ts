@@ -2,7 +2,7 @@ import { useGlobalDataContext } from '@/contexts/globalData'
 import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import { useConnectWallet } from './useConnectWallet'
 import { useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
-import { formatUnits, type Abi } from 'viem'
+import { type Abi } from 'viem'
 import { useStandardTokenInfo } from './useStandardTokenInfo'
 import Decimal from 'decimal.js'
 import { toast } from 'react-toastify'
@@ -43,7 +43,7 @@ export function useMintToken(contract: `0x${string}`) {
         const fee = BigInt(tokenInfo.mintFee)
 
         if (!checkBalance(balanceData?.value ?? BigInt(0), fee)) {
-          toast.error(`Insufficient balance to cover the mint fee of ${formatUnits(fee, balanceData?.decimals ?? 18)}`)
+          toast.error('Insufficient balance')
           return
         }
 
