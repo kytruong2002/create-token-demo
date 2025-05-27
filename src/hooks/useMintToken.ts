@@ -2,11 +2,13 @@ import { useGlobalDataContext } from '@/contexts/globalData'
 import Standard_ERC20_ABI from '@/contracts/abi/standardERC20'
 import { useConnectWallet } from './useConnectWallet'
 import { useBalance, usePublicClient, useReadContract, useWriteContract } from 'wagmi'
-import { formatUnits, type Abi } from 'viem'
-import { useERC20TokenInfo } from './useERC20TokenInfo'
+import { formatUnits } from 'viem'
 import Decimal from 'decimal.js'
 import { toast } from 'react-toastify'
 import { NATIVE_SYMBOL } from '@/config/chain'
+import { useEffect, useState } from 'react'
+import tokenService from '@/services/tokenService'
+import type { Token } from '@/types/token'
 
 export function useMintToken(contract: `0x${string}`) {
   const standardERC20 = {
@@ -14,17 +16,21 @@ export function useMintToken(contract: `0x${string}`) {
     abi: Standard_ERC20_ABI
   }
   const { setIsLoading } = useGlobalDataContext()
-  const { checkNetwork } = useConnectWallet()
+  const { checkNetwork, address } = useConnectWallet()
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     ...standardERC20,
     functionName: 'totalSupply'
   })
-  const tokenInfo = useERC20TokenInfo({
-    address: standardERC20.address,
-    abi: standardERC20.abi as Abi
+  const { data: decimals } = useReadContract({
+    ...standardERC20,
+    functionName: 'decimals'
   })
-
-  const { address } = useConnectWallet()
+  // const tokenInfo = useERC20TokenInfo({
+  //   address: standardERC20.address,
+  //   abi: standardERC20.abi as Abi
+  // })
+  const [tokenInfo, setTokenInfo] = useState<Token>()
+  const [totalGas, setTotalGas] = useState<bigint>(BigInt(0))
   const { data: balanceData } = useBalance({ address })
   const { writeContractAsync } = useWriteContract()
   const publicClient = usePublicClient()
@@ -38,6 +44,47 @@ export function useMintToken(contract: `0x${string}`) {
     }
   }
 
+  const getTotalGas = async (fee: bigint) => {
+    try {
+      if (!publicClient) return BigInt(0)
+      const { request } = await publicClient.simulateContract(getStandardERC20(fee))
+      const gasPrice = (await publicClient.getGasPrice()) ?? BigInt(0)
+      const gasEstimated = (await publicClient?.estimateContractGas(request)) ?? BigInt(0)
+
+      const gasPriceDecimal = new Decimal(gasPrice.toString())
+      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
+      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
+
+      const minFeeDecimal = new Decimal(fee.toString())
+      const totalGasDecimal = feeGasDecimal.plus(minFeeDecimal)
+      setTotalGas(BigInt(totalGasDecimal.toFixed(0)))
+      return BigInt(totalGasDecimal.toFixed(0))
+    } catch (error) {
+      console.error('Error calculating total gas:', error)
+      return BigInt(0)
+    }
+  }
+
+  useEffect(() => {
+    if (contract) {
+      ;(async () => {
+        try {
+          setIsLoading(true)
+          const { data } = await tokenService.getOne(contract)
+          setTokenInfo(data)
+          if (!isNaN(parseInt(data.mintFee))) {
+            await getTotalGas(BigInt(data.mintFee))
+          }
+        } catch (error) {
+          console.error('Error fetching token data:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      })()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contract])
+
   const checkFeeGas = async (fee: bigint) => {
     try {
       const balance = balanceData?.value ?? BigInt(0)
@@ -46,16 +93,8 @@ export function useMintToken(contract: `0x${string}`) {
         toast.error(`Not enough ${NATIVE_SYMBOL}`)
         return false
       }
-      const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-      const gasEstimated = (await publicClient?.estimateContractGas(getStandardERC20(fee))) ?? BigInt(0)
-
-      const gasPriceDecimal = new Decimal(gasPrice.toString())
-      const gasEstimatedDecimal = new Decimal(gasEstimated.toString())
-      const feeGasDecimal = gasPriceDecimal.times(gasEstimatedDecimal)
-
-      const minFeeDecimal = new Decimal(fee.toString())
-      const totalGasDecimal = feeGasDecimal.plus(minFeeDecimal)
-      const totalGas = BigInt(totalGasDecimal.toFixed(0))
+      const totalGas = await getTotalGas(fee)
+      const totalGasDecimal = new Decimal(totalGas.toString())
 
       if (balanceDecimal.lessThan(totalGasDecimal)) {
         toast.error(
@@ -72,10 +111,11 @@ export function useMintToken(contract: `0x${string}`) {
 
   const handleMint = async () => {
     if (
+      tokenInfo &&
       typeof totalSupply === 'bigint' &&
-      typeof tokenInfo?.maxSupply === 'bigint' &&
-      typeof tokenInfo.amountPerMint === 'bigint' &&
-      typeof tokenInfo.mintFee === 'bigint' &&
+      !isNaN(parseInt(tokenInfo?.maxSupply as string)) &&
+      !isNaN(parseInt(tokenInfo?.amountPerMint as string)) &&
+      !isNaN(parseInt(tokenInfo?.mintFee as string)) &&
       checkNetwork()
     ) {
       const fee = BigInt(tokenInfo.mintFee)
@@ -122,5 +162,5 @@ export function useMintToken(contract: `0x${string}`) {
     }
   }
 
-  return { handleMint, totalSupply, tokenInfo }
+  return { handleMint, totalSupply, tokenInfo, decimals, totalGas }
 }
