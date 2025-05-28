@@ -6,7 +6,8 @@ import { type Abi } from 'viem'
 import { useStandardTokenInfo } from './useStandardTokenInfo'
 import Decimal from 'decimal.js'
 import { toast } from 'react-toastify'
-import { checkBalance, checkFeeGas } from '@/utils/helpers'
+import { checkBalance } from '@/utils/helpers'
+import { useGasFee } from './useGasFee'
 
 export function useMintToken(contract: `0x${string}`) {
   const standardERC20 = {
@@ -20,11 +21,25 @@ export function useMintToken(contract: `0x${string}`) {
     functionName: 'totalSupply'
   })
   const tokenInfo = useStandardTokenInfo(standardERC20 as { address: `0x${string}`; abi: Abi })
-
+  const functionName = 'mint'
+  const { fetchGasFee } = useGasFee({
+    ...(standardERC20 as { address: `0x${string}`; abi: Abi }),
+    functionName
+  })
   const { address } = useConnectWallet()
   const { data: balanceData } = useBalance({ address })
   const { writeContractAsync } = useWriteContract()
   const publicClient = usePublicClient()
+
+  const checkMaxSupply = ({ total, max, amount }: { total: bigint; max: bigint; amount: bigint }) => {
+    const totalDecimal = new Decimal(total.toString())
+    const amountDecimal = new Decimal(amount.toString())
+    const maxDecimal = new Decimal(max.toString())
+    if (totalDecimal.plus(amountDecimal).greaterThan(maxDecimal)) {
+      return false
+    }
+    return true
+  }
 
   const handleMint = async () => {
     if (!checkNetwork()) return
@@ -36,7 +51,6 @@ export function useMintToken(contract: `0x${string}`) {
         typeof tokenInfo.amountPerMint === 'bigint' &&
         typeof tokenInfo.mintFee === 'bigint'
       ) {
-        const functionName = 'mint'
         const fee = BigInt(tokenInfo.mintFee)
 
         if (!checkBalance(balanceData?.value ?? BigInt(0), fee)) {
@@ -44,34 +58,18 @@ export function useMintToken(contract: `0x${string}`) {
           return
         }
 
-        const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-        const gasLimit =
-          (await publicClient?.estimateContractGas({
-            ...standardERC20,
-            functionName,
-            value: fee,
-            account: address
-          })) ?? BigInt(0)
-        const block = await publicClient?.getBlock({ blockTag: 'latest' })
-        if (
-          !checkFeeGas({
-            balance: balanceData?.value ?? BigInt(0),
-            gasLimit,
-            gasPrice,
-            baseFeePerGas: block?.baseFeePerGas ?? undefined
-          })
-        ) {
+        const isEnough = await fetchGasFee({ value: fee })
+        if (!isEnough) {
           toast.error('Insufficient balance for gas fees.')
           return
         }
 
-        const total = BigInt(totalSupply)
-        const amount = BigInt(tokenInfo.amountPerMint)
-        const max = BigInt(tokenInfo.maxSupply)
-        const totalDecimal = new Decimal(total.toString())
-        const amountDecimal = new Decimal(amount.toString())
-        const maxDecimal = new Decimal(max.toString())
-        if (totalDecimal.plus(amountDecimal).greaterThan(maxDecimal)) {
+        const isValid = checkMaxSupply({
+          total: totalSupply,
+          max: tokenInfo.maxSupply,
+          amount: tokenInfo.amountPerMint
+        })
+        if (isValid) {
           toast.error('Total supply exceeded max supply')
           return
         }

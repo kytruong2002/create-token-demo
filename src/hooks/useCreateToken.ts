@@ -4,17 +4,21 @@ import type { FieldTokenType } from '@/types/token'
 import { toast } from 'react-toastify'
 import { parseUnits, type Abi } from 'viem'
 import { useConnectWallet } from './useConnectWallet'
-import { useBalance, usePublicClient, useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 import { factoryContract } from '@/contracts'
-import { checkFeeGas } from '@/utils/helpers'
 import tokenService from '@/services/tokenService'
+import { useGasFee } from './useGasFee'
 
 export function useCreateToken() {
   const { setIsLoading } = useGlobalDataContext()
   const { address, checkNetwork } = useConnectWallet()
   const publicClient = usePublicClient()
   const { writeContractAsync } = useWriteContract()
-  const { data: balanceData } = useBalance({ address })
+  const functionName = 'createStandardToken'
+  const { fetchGasFee } = useGasFee({
+    ...(factoryContract as { address: `0x${string}`; abi: Abi }),
+    functionName
+  })
 
   const handleCreateToken = async (values: FieldTokenType) => {
     if (!address && !publicClient) {
@@ -37,25 +41,9 @@ export function useCreateToken() {
       const amountPerMint = parseUnits(values.amountPerMint?.toString() || '0', NATIVE_DECIMAL)
       const mintFee = parseUnits(values.mintFee?.toString() || '0', NATIVE_DECIMAL)
       const args = [values.name, values.symbol, initialSupply, maxSupply, amountPerMint, mintFee]
-      const functionName = 'createStandardToken'
 
-      const gasPrice = (await publicClient?.getGasPrice()) ?? BigInt(0)
-      const block = await publicClient?.getBlock({ blockTag: 'latest' })
-      const gasLimit =
-        (await publicClient?.estimateContractGas({
-          ...(factoryContract as { address: `0x${string}`; abi: Abi }),
-          functionName,
-          args,
-          account: address
-        })) ?? BigInt(0)
-      if (
-        !checkFeeGas({
-          balance: balanceData?.value ?? BigInt(0),
-          gasLimit,
-          gasPrice,
-          baseFeePerGas: block?.baseFeePerGas ?? undefined
-        })
-      ) {
+      const isEnough = await fetchGasFee({ args })
+      if (!isEnough) {
         toast.error('Insufficient balance for gas fees.')
         return
       }
