@@ -7,6 +7,7 @@ This project is a **Demo Create Token** built with **React, TypeScript, Wagmi, V
 - Mint
 - List Token
 - Your Token
+- List Pool
 
 ## 📦 Installation
 
