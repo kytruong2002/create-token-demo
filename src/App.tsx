@@ -8,7 +8,7 @@ import { wagmiConfig } from './config/wagmi'
 import { useGlobalDataContext } from './contexts/globalData'
 import { Spin } from 'antd'
 import { Provider } from 'urql'
-import graphQLClient from './utils/graphQL'
+import graphQLClient from './config/graphQL'
 
 function App() {
   const { isLoading } = useGlobalDataContext()

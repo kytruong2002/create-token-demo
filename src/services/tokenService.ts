@@ -1,6 +1,6 @@
 import type { ApiResponse, PaginationParams } from '@/types/api'
 import type { Token } from '@/types/token'
-import api from '@/utils/axios'
+import api from '@/config/axios'
 import { LIMIT } from '@/utils/const'
 
 const url = (path: string = '') => `/tokens/${path}`

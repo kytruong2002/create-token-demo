@@ -1,5 +1,5 @@
+import { GRAPHQLURI } from '@/utils/const'
 import { cacheExchange, createClient, fetchExchange } from 'urql'
-import { GRAPHQLURI } from './const'
 
 const graphQLClient = createClient({
   url: GRAPHQLURI,

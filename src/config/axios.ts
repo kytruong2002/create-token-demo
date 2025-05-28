@@ -1,7 +1,7 @@
 import axios from 'axios'
 import store from '@/store'
 import { logout } from '@/store/features/useSlice'
-import { BE_URL, PATH } from './const'
+import { BE_URL, PATH } from '../utils/const'
 
 const api = axios.create({
   baseURL: BE_URL,
