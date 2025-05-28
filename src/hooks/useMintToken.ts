@@ -13,17 +13,17 @@ export function useMintToken(contract: `0x${string}`) {
   const standardERC20 = {
     address: contract,
     abi: Standard_ERC20_ABI
-  }
+  } as { address: `0x${string}`; abi: Abi }
   const { setIsLoading } = useGlobalDataContext()
   const { checkNetwork } = useConnectWallet()
   const { data: totalSupply, refetch: refetchTotalSupply } = useReadContract({
     ...standardERC20,
     functionName: 'totalSupply'
   })
-  const tokenInfo = useStandardTokenInfo(standardERC20 as { address: `0x${string}`; abi: Abi })
+  const tokenInfo = useStandardTokenInfo(standardERC20)
   const functionName = 'mint'
   const { fetchGasFee } = useGasFee({
-    ...(standardERC20 as { address: `0x${string}`; abi: Abi }),
+    ...standardERC20,
     functionName
   })
   const { address } = useConnectWallet()

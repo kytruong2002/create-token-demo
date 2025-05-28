@@ -2,7 +2,7 @@ import { NATIVE_DECIMAL } from '@/config/chain'
 import { useGlobalDataContext } from '@/contexts/globalData'
 import type { FieldTokenType } from '@/types/token'
 import { toast } from 'react-toastify'
-import { parseUnits, type Abi } from 'viem'
+import { parseUnits } from 'viem'
 import { useConnectWallet } from './useConnectWallet'
 import { usePublicClient, useWriteContract } from 'wagmi'
 import { factoryContract } from '@/contracts'
@@ -16,7 +16,7 @@ export function useCreateToken() {
   const { writeContractAsync } = useWriteContract()
   const functionName = 'createStandardToken'
   const { fetchGasFee } = useGasFee({
-    ...(factoryContract as { address: `0x${string}`; abi: Abi }),
+    ...factoryContract,
     functionName
   })
 
@@ -49,7 +49,7 @@ export function useCreateToken() {
       }
 
       const hash = await writeContractAsync({
-        ...(factoryContract as { address: `0x${string}`; abi: Abi }),
+        ...factoryContract,
         functionName,
         args
       })
