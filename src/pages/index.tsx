@@ -1,5 +1,6 @@
 export { default as Home } from './home'
 export { default as Login } from './login'
 export { default as Mint } from './mint'
+export { default as ListPool } from './listPool'
 export { default as ListToken } from './listToken'
 export { default as NotFound } from './notFound'

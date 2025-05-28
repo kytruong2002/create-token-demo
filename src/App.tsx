@@ -7,11 +7,13 @@ import { WagmiProvider } from 'wagmi'
 import { wagmiConfig } from './config/wagmi'
 import { useGlobalDataContext } from './contexts/globalData'
 import { Spin } from 'antd'
+import { Provider } from 'urql'
+import graphQLClient from './utils/graphQL'
 
 function App() {
   const { isLoading } = useGlobalDataContext()
   return (
-    <>
+    <Provider value={graphQLClient}>
       <QueryClientProvider client={queryClient}>
         <WagmiProvider config={wagmiConfig}>
           <BrowserRouter>
@@ -32,7 +34,7 @@ function App() {
         </WagmiProvider>
       </QueryClientProvider>
       <Spin fullscreen size='large' spinning={isLoading} />
-    </>
+    </Provider>
   )
 }
 
