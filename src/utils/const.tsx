@@ -31,4 +31,4 @@ export const NAVBAR_ITEM = [
 
 export const COLORS = ['default', 'primary', 'danger', 'pink', 'purple', 'cyan']
 export const LIMIT = 10
-export const GRAPHQLURI = 'https://gateway.thegraph.com/api/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV'
+export const GRAPHQLURI = 'https://graph.codex.io/graphql'

@@ -5,7 +5,7 @@ const graphQLClient = createClient({
   url: GRAPHQLURI,
   fetchOptions: {
     headers: {
-      Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`
+      Authorization: `${import.meta.env.VITE_API_KEY}`
     }
   },
 

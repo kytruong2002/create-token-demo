@@ -6,7 +6,19 @@ import { useGlobalDataContext } from '@/contexts/globalData'
 import { useEffect } from 'react'
 
 const TopTrending = () => {
-  const [result] = useQuery({ query: TOP_TRENDING_QUERY })
+  const [result] = useQuery({
+    query: TOP_TRENDING_QUERY,
+    variables: {
+      networkId: ['bsc', 'base'],
+      rankings: [
+        {
+          attribute: 'trendingScore24',
+          direction: 'DESC'
+        }
+      ],
+      limit: 10
+    }
+  })
   const { data, fetching } = result
   const { setIsLoading, title, setTitle } = useGlobalDataContext()
 
@@ -25,15 +37,15 @@ const TopTrending = () => {
     },
     {
       title: 'Name',
-      dataIndex: 'name'
+      render: (_: any, data: any) => data?.token?.name
     },
     {
       title: 'Symbol',
-      dataIndex: 'symbol'
+      render: (_: any, data: any) => data?.token?.symbol
     },
     {
-      title: 'Volume (USD)',
-      dataIndex: 'volumeUSD',
+      title: 'Volume 24h',
+      dataIndex: 'volume24',
       render: (v: string) =>
         (+v).toLocaleString('en-US', {
           style: 'currency',
@@ -41,17 +53,22 @@ const TopTrending = () => {
         })
     },
     {
-      title: 'TX Count',
-      dataIndex: 'txCount'
+      title: 'Price USD',
+      dataIndex: 'priceUSD',
+      render: (v: string) =>
+        (+v).toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD'
+        })
     }
   ]
 
   return (
     <Card title={title.toLocaleUpperCase()} variant='borderless'>
       <Table
-        dataSource={data?.tokens || []}
+        dataSource={data?.filterTokens?.results || []}
         columns={columns}
-        rowKey='id'
+        rowKey={(record) => `${record.token.address}:${record.token.networkId}`}
         pagination={false}
         scroll={{ x: 'max-content' }}
       />
