@@ -7,7 +7,7 @@ export const PATH = {
   LOGIN: '/login',
   MINT: '/mint/:contract',
   LIST_TOKEN: '/list',
-  LIST_POOL: '/list-pool',
+  TOP_TRENDING: '/top-trending',
   YOUR_TOKEN: '/your'
 }
 export const NAVBAR_ITEM = [
@@ -24,11 +24,11 @@ export const NAVBAR_ITEM = [
     key: PATH.YOUR_TOKEN
   },
   {
-    label: <Link to={PATH.LIST_POOL}>List Pool</Link>,
-    key: PATH.LIST_POOL
+    label: <Link to={PATH.TOP_TRENDING}>Top Trending</Link>,
+    key: PATH.TOP_TRENDING
   }
 ]
 
 export const COLORS = ['default', 'primary', 'danger', 'pink', 'purple', 'cyan']
 export const LIMIT = 10
-export const GRAPHQLURI = 'https://gateway.thegraph.com/api/subgraphs/id/3utanEBA9nqMjPnuQP1vMCCys6enSM3EawBpKTVwnUw2'
+export const GRAPHQLURI = 'https://gateway.thegraph.com/api/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV'
