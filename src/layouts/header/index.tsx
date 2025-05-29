@@ -9,6 +9,15 @@ import styled from 'styled-components'
 const Title = styled(Button)`
   font-size: 2rem;
   font-weight: 700;
+  text-align: left;
+  span {
+    text-wrap: wrap;
+    overflow: hidden;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    display: -webkit-box;
+    text-overflow: ellipsis;
+  }
 `
 
 const HeaderContainer = styled.header`
